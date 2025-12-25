@@ -25,7 +25,7 @@ from datetime import datetime
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from config import GOOGLE_API_KEY, GEMINI_MODEL, TEMPERATURE
+from config import GOOGLE_API_KEY, GEMINI_MODEL, TEMPERATURE, CANNOT_DEMONSTRATE, PARAMETER_INFO
 from state import add_message_to_history
 
 
@@ -198,7 +198,16 @@ CURRENT TEACHING STRATEGY: {strategy}
 {"- Summarize the key point and prepare to move on" if strategy == "summarize_advance" else ""}
 
 SIMULATION INFO:
-Current parameters: Length={current_params.get('length', 1.0)}m, Mass={current_params.get('mass', 1.0)}kg, Angle={current_params.get('angle', 15)}°, Gravity={current_params.get('gravity', 9.8)}m/s²
+Current parameters: Length={current_params.get('length', 5)} units, Oscillations={current_params.get('number_of_oscillations', 10)} count
+
+Available parameters:
+- length: 1-10 units (affects time period - longer = slower swings)
+- number_of_oscillations: 5-50 count (affects total time, NOT period)
+
+⚠️ IMPORTANT - DO NOT MENTION THESE (not in this simulation):
+- Mass (this simulation does not include mass)
+- Gravity (this simulation does not include gravity)  
+- Damping or energy loss
 
 CRITICAL RULES FOR ASKING QUESTIONS:
 1. **ALWAYS end with ONE specific, answerable question**

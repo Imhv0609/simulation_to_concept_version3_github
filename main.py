@@ -12,7 +12,7 @@ from typing import Dict, Any
 
 from config import (
     validate_config, 
-    PENDULUM_DESCRIPTION, 
+    TOPIC_DESCRIPTION, 
     INITIAL_PARAMS,
     MAX_EXCHANGES
 )
@@ -37,10 +37,8 @@ def print_simulation_state(params: Dict[str, float]):
     print("\n┌" + "─"*50 + "┐")
     print("│" + " 🧪 SIMULATION STATE".ljust(50) + "│")
     print("├" + "─"*50 + "┤")
-    print(f"│  Length:  {params.get('length', 1.0):.2f} m".ljust(51) + "│")
-    print(f"│  Mass:    {params.get('mass', 1.0):.2f} kg".ljust(51) + "│")
-    print(f"│  Angle:   {params.get('angle', 15):.1f}°".ljust(51) + "│")
-    print(f"│  Gravity: {params.get('gravity', 9.8):.1f} m/s²".ljust(51) + "│")
+    print(f"│  Length:       {params.get('length', 5)} units".ljust(51) + "│")
+    print(f"│  Oscillations: {params.get('number_of_oscillations', 10)} count".ljust(51) + "│")
     print("└" + "─"*50 + "┘")
 
 
@@ -138,12 +136,12 @@ def run_teaching_session():
     
     # Create initial state
     initial_state = create_initial_state(
-        topic_description=PENDULUM_DESCRIPTION,
+        topic_description=TOPIC_DESCRIPTION,
         initial_params=INITIAL_PARAMS
     )
     
-    print("\n📖 Topic: Simple Pendulum")
-    print("   We'll explore how pendulums work through interactive simulation!")
+    print("\n📖 Topic: Time & Pendulums")
+    print("   We'll explore how time period is measured and how it depends on length!")
     
     # Start session
     print("\n⏳ Initializing teaching session...")

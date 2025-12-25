@@ -94,6 +94,7 @@ class TeachingState(TypedDict):
     session_complete: bool              # All concepts done?
     waiting_for_input: bool             # Paused for student response?
     needs_deeper: bool                  # Ask student to explain WHY (observation without reasoning)
+    cannot_demonstrate: List[str]       # Topics NOT in this simulation (don't mention)
 
 
 def create_initial_state(topic_description: str, initial_params: Dict[str, float]) -> TeachingState:
@@ -138,7 +139,8 @@ def create_initial_state(topic_description: str, initial_params: Dict[str, float
         "concept_complete": False,
         "session_complete": False,
         "waiting_for_input": False,
-        "needs_deeper": False
+        "needs_deeper": False,
+        "cannot_demonstrate": []
     }
 
 

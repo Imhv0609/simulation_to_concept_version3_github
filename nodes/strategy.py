@@ -32,7 +32,7 @@ def analyze_param_effectiveness(param_history: List[dict]) -> dict:
             "untried_params": ["gravity", ...]
         }
     """
-    all_params = {"length", "mass", "angle", "gravity"}
+    all_params = {"length", "number_of_oscillations"}
     tried_params = set()
     effective = set()
     ineffective = set()

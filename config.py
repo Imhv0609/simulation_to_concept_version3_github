@@ -12,17 +12,17 @@ from pathlib import Path
 ENV_PATH = Path(__file__).parent / ".env"
 load_dotenv(ENV_PATH)
 
-# ═══════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════
 # LLM CONFIGURATION
-# ═══════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemma-3-27b-it")
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0.7"))
 
-# ═══════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════
 # TEACHING AGENT CONFIGURATION
-# ═══════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════
 
 # Guardrails
 MAX_EXCHANGES = int(os.getenv("MAX_EXCHANGES", "6"))      # Absolute ceiling per concept
@@ -43,33 +43,73 @@ STRATEGIES = [
     "summarize_advance" # Wrap up and move on
 ]
 
-# ═══════════════════════════════════════════════════════════════════════════
-# TOPIC CONTENT (Simple Pendulum)
-# ═══════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════
+# TOPIC CONTENT (Time & Pendulums - Intermediate Level)
+# ═══════════════════════════════════════════════════════════════════════
 
-PENDULUM_DESCRIPTION = """
-A pendulum is a weight hanging from a string that swings back and forth.
-Think of a child on a swing or a grandfather clock.
+TOPIC_TITLE = "Time & Pendulums"
 
-What affects how fast it swings?
-- The length of the string (longer = slower swings)
-- Gravity (stronger gravity = faster swings)
-- Surprisingly, the weight and starting angle don't change the speed much!
+TOPIC_DESCRIPTION = """
+An interactive pendulum simulation where you can control pendulum length 
+and number of oscillations to demonstrate how time period is measured 
+and how it depends on length.
 
-You can change: string length, weight, starting angle, and gravity.
+What can be demonstrated:
+- Oscillatory motion (back and forth swinging)
+- Measurement of time using oscillations
+- Effect of pendulum length on time period
+- Difference between total time and time period
+- Stability of measurement using multiple oscillations
 """
+
+# What this simulation CANNOT demonstrate (agent should NOT mention these)
+CANNOT_DEMONSTRATE = [
+    "Effect of mass on time period",
+    "Effect of gravity on time period",
+    "Damping or energy loss"
+]
 
 # Initial simulation parameters
 INITIAL_PARAMS = {
-    "length": 1.0,      # meters
-    "mass": 1.0,        # kg
-    "angle": 15,        # degrees
-    "gravity": 9.8      # m/s²
+    "length": 5,                    # 1-10 units
+    "number_of_oscillations": 10    # 5-50 count
 }
 
-# ═══════════════════════════════════════════════════════════════════════════
+# Parameter details for teacher reference
+PARAMETER_INFO = {
+    "length": {
+        "label": "Pendulum Length",
+        "range": "1-10 units",
+        "effect": "Longer = slower swings (longer period), Shorter = faster swings (shorter period)"
+    },
+    "number_of_oscillations": {
+        "label": "Oscillations to Observe",
+        "range": "5-50 count",
+        "effect": "More oscillations = more total time, but time period stays the same"
+    }
+}
+
+# Pre-defined concepts (Intermediate level from simulation design)
+PRE_DEFINED_CONCEPTS = [
+    {
+        "id": 1,
+        "title": "Time Period of a Pendulum",
+        "description": "How the length of a pendulum affects how long it takes to complete one swing.",
+        "key_insight": "Longer pendulum = longer time period (slower swings)",
+        "related_params": ["length"]
+    },
+    {
+        "id": 2,
+        "title": "Time Period vs Number of Oscillations",
+        "description": "Understanding that changing the number of oscillations changes total time but NOT the time period.",
+        "key_insight": "More oscillations = more total time, but time period stays the same",
+        "related_params": ["number_of_oscillations"]
+    }
+]
+
+# ═══════════════════════════════════════════════════════════════════════
 # VALIDATION
-# ═══════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════
 
 def validate_config():
     """Validate that required configuration is present."""
