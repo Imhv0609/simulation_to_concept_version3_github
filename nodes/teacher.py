@@ -178,6 +178,9 @@ def teacher_node(state: Dict[str, Any]) -> Dict[str, Any]:
     # Build the teaching prompt
     system_prompt = f"""You are a warm, engaging physics teacher named Alex. You're teaching a student about the simple pendulum through an interactive simulation.
 
+⚠️ CRITICAL: You MUST respond with ONLY a valid JSON object. No extra text before or after.
+Your response must start with {{ and end with }}.
+
 YOUR PERSONALITY:
 - Warm, patient, and genuinely interested in helping students learn
 - Uses analogies and real-world examples
@@ -261,7 +264,8 @@ Example structure:
 Now let's explore [new concept]. [engaging intro]... 
 What do you think will happen if [question with options]?"
 
-Return JSON:
+⚠️ RESPOND WITH ONLY THIS JSON FORMAT (no other text):
+```json
 {{
     "teacher_message": "Your message that summarizes previous + introduces new...",
     "suggests_param_change": false,
@@ -269,6 +273,7 @@ Return JSON:
     "new_value": null,
     "prediction_question": null
 }}
+```
 """
         else:
             # Very first concept - just introduce it
@@ -286,7 +291,8 @@ Generate an engaging introduction that:
 2. Connects to something relatable if possible
 3. Ends with a thought-provoking question OR asks for a prediction with options
 
-Return JSON:
+⚠️ RESPOND WITH ONLY THIS JSON FORMAT (no other text):
+```json
 {{
     "teacher_message": "Your warm, engaging introduction...",
     "suggests_param_change": false,
@@ -294,6 +300,7 @@ Return JSON:
     "new_value": null,
     "prediction_question": null
 }}
+```
 """
     else:
         # Continuing conversation
@@ -385,15 +392,19 @@ Example flow:
    PICK a relevant parameter from the concept's related_params
    GIVE a reasonable new value
 
-Return JSON:
+⚠️ RESPOND WITH ONLY THIS JSON FORMAT (no other text):
+```json
 {{
     "teacher_message": "Your response ending with a clear PREDICT/OBSERVE/EXPLAIN question...",
-    "suggests_param_change": {"true (REQUIRED when student stuck!)" if understanding in ['none', 'partial'] and exchange_count >= 2 else "true/false"},
-    "param_to_change": "length/mass/angle/gravity or null",
-    "new_value": number or null,
+    "suggests_param_change": {"true" if understanding in ['none', 'partial'] and exchange_count >= 2 else "true or false"},
+    "param_to_change": "length or number_of_oscillations or null",
+    "new_value": "number or null",
     "change_reason": "Why this change helps learning",
     "prediction_question": "What do you think will happen if...? (if suggesting change)"
 }}
+```
+
+REMEMBER: Output ONLY the JSON object. Start your response with {{ and end with }}.
 """
 
     llm = get_llm()

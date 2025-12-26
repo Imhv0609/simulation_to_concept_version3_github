@@ -10,11 +10,14 @@ import uuid
 import sys
 from typing import Dict, Any
 
+import webbrowser
+
 from config import (
     validate_config, 
     TOPIC_DESCRIPTION, 
     INITIAL_PARAMS,
-    MAX_EXCHANGES
+    MAX_EXCHANGES,
+    build_simulation_url
 )
 from state import create_initial_state
 from graph import start_session, continue_session
@@ -119,6 +122,16 @@ def get_student_input() -> str:
         return "quit"
 
 
+def open_simulation_if_changed(current_params: Dict[str, Any], previous_params: Dict[str, Any]) -> bool:
+    """Open simulation in browser if parameters have changed."""
+    if current_params != previous_params:
+        url = build_simulation_url(current_params)
+        print(f"\n🔗 Opening simulation with new parameters...")
+        webbrowser.open(url)
+        return True
+    return False
+
+
 def run_teaching_session():
     """Main teaching session loop."""
     print_header()
@@ -146,6 +159,9 @@ def run_teaching_session():
     # Start session
     print("\n⏳ Initializing teaching session...")
     state = start_session(initial_state, thread_id)
+    
+    # Track previous params to detect changes
+    previous_params = INITIAL_PARAMS.copy()
     
     # Main loop
     while True:
@@ -192,6 +208,11 @@ def run_teaching_session():
         # Continue session with response
         print("\n⏳ Processing your response...")
         state = continue_session(response, thread_id)
+        
+        # Check if params changed and open simulation
+        current_params = state.get("current_params", INITIAL_PARAMS)
+        if open_simulation_if_changed(current_params, previous_params):
+            previous_params = current_params.copy()
 
 
 def main():

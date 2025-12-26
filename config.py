@@ -117,3 +117,16 @@ def validate_config():
         raise ValueError("GOOGLE_API_KEY is not set in .env file")
     print(f"✅ Config loaded: Model={GEMINI_MODEL}, MaxExchanges={MAX_EXCHANGES}")
     return True
+
+# ═══════════════════════════════════════════════════════════════════════
+# SIMULATION URL
+# ═══════════════════════════════════════════════════════════════════════
+
+SIMULATION_BASE_URL = "https://imhv0609.github.io/simulation_to_concept_github/SimulationsNCERT-main/simple_pendulum.html"
+
+def build_simulation_url(params: dict, autostart: bool = True) -> str:
+    """Build simulation URL with parameters."""
+    url = f"{SIMULATION_BASE_URL}?length={params.get('length', 5)}&oscillations={params.get('number_of_oscillations', 10)}"
+    if autostart:
+        url += "&autoStart=true"
+    return url
