@@ -166,12 +166,26 @@ def teacher_node(state: Dict[str, Any]) -> Dict[str, Any]:
     conversation = state.get("conversation_history", [])
     student_response = state.get("student_response", "")
     needs_clarification = state.get("needs_clarification", False)
+    is_factually_wrong = state.get("is_factually_wrong", False)
+    
+    # New: Check if student asked a question or requested param change
+    student_asked_question = state.get("student_asked_question", False)
+    question_asked = state.get("question_asked", "")
+    student_requested_param = state.get("student_requested_param", False)
+    requested_param = state.get("requested_param", "")
+    requested_value = state.get("requested_value", None)
     
     print(f"   Concept: {current_concept['title']}")
     print(f"   Strategy: {strategy}")
     print(f"   Mode: {teacher_mode}")
     print(f"   Understanding: {understanding}")
     print(f"   Exchange #: {exchange_count}")
+    if student_asked_question:
+        print(f"   ❓ Student asked: {question_asked}")
+    if student_requested_param:
+        print(f"   🎛️ Student requested: {requested_param} = {requested_value}")
+    if is_factually_wrong:
+        print(f"   ❌ Student gave WRONG answer - needs correction")
     if needs_clarification:
         print(f"   🔄 Clarification requested")
     
@@ -305,10 +319,84 @@ Generate an engaging introduction that:
     else:
         # Continuing conversation
         needs_deeper = state.get("needs_deeper", False)
+        is_factually_wrong = state.get("is_factually_wrong", False)
+        
+        # Build instruction for student's QUESTION
+        question_instruction = ""
+        if student_asked_question and question_asked:
+            question_instruction = f"""
+❓❓❓ MANDATORY: STUDENT ASKED A QUESTION - YOU MUST ANSWER IT ❓❓❓
+The student asked: "{question_asked}"
+
+⚠️ YOU MUST ANSWER THIS QUESTION DIRECTLY. DO NOT deflect or delay!
+⚠️ DO NOT say "before we dive into that..." or "let's see first..."
+⚠️ ANSWER FIRST, then continue teaching
+
+ANSWER THESE DIRECTLY:
+- "What is time period?" → "Time period is the time for one complete swing (back and forth)."
+- "What is the formula?" → "The formula is T = 2π√(L/g), where T is time period, L is length, and g is gravity (about 10 m/s²)."
+- "Why does length affect it?" → "Because a longer pendulum has to travel a longer arc, so it takes more time."
+
+YOUR RESPONSE FORMAT:
+1. FIRST: Answer the question directly (2-3 sentences)
+2. THEN: Optionally connect to what we're learning
+3. FINALLY: Ask a follow-up question
+
+Example for "What is the formula?":
+"Great question! The formula for time period is T = 2π√(L/g). This tells us that time period depends only on length (L) and gravity (g) - not on mass! Notice how length is under a square root, which means doubling the length increases the period by about 1.4 times (√2). Based on this, if we make the pendulum shorter, will the period increase or decrease?"
+"""
+
+        # Build instruction for student's PARAMETER REQUEST
+        param_request_instruction = ""
+        if student_requested_param and requested_param:
+            param_request_instruction = f"""
+🎛️🎛️🎛️ MANDATORY: STUDENT REQUESTED PARAMETER CHANGE 🎛️🎛️🎛️
+The student wants to change: {requested_param}
+
+⚠️ CRITICAL RULES:
+1. DO NOT say "Not quite" or correct them - they made a REQUEST, not an answer!
+2. DO NOT override their request with different values
+3. DO NOT say "but let's do something else instead"
+4. RESPECT their curiosity and desire to experiment!
+
+YOU MUST:
+1. ACKNOWLEDGE positively: "Sure!" or "Great idea!" or "Let's try that!"
+2. CONFIRM you're making their requested change (not a different one)
+3. GUIDE observation: "OBSERVE: What do you notice about the swing speed now?"
+
+Example response (if they asked for length=3):
+"Sure, let's try that! I've set the length to 3 units as you requested. OBSERVE: Watch the simulation now - is the pendulum swinging faster or slower than before?"
+
+DO NOT DO THIS (wrong):
+❌ "Not quite, friend. Actually..." - This is for WRONG ANSWERS, not requests!
+❌ "Let me change it to 2 instead..." - Respect their choice!
+❌ "But first let's..." - Don't delay or redirect!
+"""
+
+        # Build instruction for correction if student gave WRONG answer
+        correction_instruction = ""
+        if is_factually_wrong and not student_asked_question and not student_requested_param:
+            correction_instruction = """
+⚠️⚠️⚠️ STUDENT GAVE A FACTUALLY WRONG ANSWER - MUST CORRECT ⚠️⚠️⚠️
+The student stated something that is INCORRECT. You MUST:
+1. POLITELY but CLEARLY tell them they are wrong: "Not quite, friend." or "Actually, that's not correct."
+2. STATE the correct fact: "A longer pendulum actually swings SLOWER, not faster."
+3. OFFER to demonstrate: "Let me show you with the simulation..."
+
+DO NOT:
+❌ Say "Good thinking!" or "You're on the right track!" - they are NOT
+❌ Say "Almost!" or "Close!" - they got it WRONG
+❌ Validate their incorrect answer in ANY way
+
+DO:
+✅ Be kind but honest: "Not quite, friend."
+✅ Correct clearly: "Actually, [correct fact]"
+✅ Help them see: "Let me demonstrate..."
+"""
         
         # Build instruction for asking WHY if they gave observation without reasoning
         deeper_instruction = ""
-        if needs_deeper:
+        if needs_deeper and not is_factually_wrong and not student_asked_question and not student_requested_param:
             deeper_instruction = """
 ⚠️ STUDENT GAVE CORRECT OBSERVATION BUT NO REASONING:
 They said WHAT happens correctly, but didn't explain WHY. Your job is to:
@@ -318,13 +406,27 @@ They said WHAT happens correctly, but didn't explain WHY. Your job is to:
 This is NOT a correction - they're on the right track! Just need them to think deeper.
 """
         
-        user_prompt = f"""
+        # Build the correction flag at the very top of prompt
+        wrong_answer_alert = ""
+        if is_factually_wrong and not student_asked_question and not student_requested_param:
+            wrong_answer_alert = """
+🚨🚨🚨 CRITICAL: STUDENT GAVE WRONG ANSWER - MUST CORRECT! 🚨🚨🚨
+DO NOT PRAISE! DO NOT SAY "EXACTLY RIGHT" OR "GREAT OBSERVATION"!
+The student's answer is FACTUALLY INCORRECT. You MUST start with:
+"Not quite, friend..." or "Actually, that's not correct..."
+🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
+"""
+        
+        user_prompt = f"""{wrong_answer_alert}
 CONCEPT BEING TAUGHT:
 Title: {current_concept['title']}
 Key Insight: {current_concept['key_insight']}
 
 STUDENT'S UNDERSTANDING LEVEL: {understanding}
 EXCHANGE NUMBER: {exchange_count}
+{question_instruction}
+{param_request_instruction}
+{correction_instruction}
 {deeper_instruction}
 
 PARAMETER CHANGE HISTORY:
@@ -339,10 +441,29 @@ STUDENT'S LATEST RESPONSE: "{student_response}"
 ⚠️ CRITICAL RULES - READ CAREFULLY
 ═══════════════════════════════════════════════════════════════
 
-RULE 1 - HONEST FEEDBACK (NO FALSE PRAISE):
-- If understanding is "none" or student said "I don't know": Do NOT say "Great observation!" or "You correctly noticed..."
-- Instead say: "That's okay! Let me help you..." or "No problem, let's figure this out together..."
-- ONLY praise when they actually gave a correct answer
+RULE 1 - HONEST FEEDBACK (NO FALSE PRAISE OR VALIDATION):
+⚠️ CRITICAL: Never validate or praise WRONG answers!
+
+IF understanding is "none" AND student gave a WRONG answer (not just "I don't know"):
+- Do NOT say: "Good thinking!", "Right direction!", "That's a reasonable thought!"
+- Do NOT say: "You're onto something!", "Close!", "Almost!"
+- DO say: "Not quite, friend." or "Actually, that's not correct."
+- THEN explain: "A longer pendulum actually swings SLOWER, not faster. Let me show you..."
+- Be KIND but HONEST - false praise confuses students!
+
+IF student said "I don't know":
+- Say: "That's okay! Let me help you figure this out..."
+- This is DIFFERENT from being wrong - they haven't made a mistake, they just need help
+
+IF student is CORRECT:
+- Praise appropriately: "Exactly right!" or "Great observation!"
+
+EXAMPLES:
+❌ WRONG (don't do this): "Good thinking! But actually longer pendulums swing slower..."
+✅ RIGHT: "Not quite, friend. Longer pendulums actually swing SLOWER, not faster. Let me show you why..."
+
+❌ WRONG: "You're on the right track! Though the answer is actually the opposite..."
+✅ RIGHT: "Actually, that's the opposite of what happens. Let me demonstrate..."
 
 RULE 2 - ALWAYS BE SPECIFIC ABOUT WHAT YOU WANT:
 Every response MUST end with a CLEAR ACTION for the student. Use these formats:

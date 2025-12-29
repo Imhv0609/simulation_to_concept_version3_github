@@ -7,6 +7,7 @@ Handles LLM setup, environment variables, and constants.
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+from simulations_config import get_simulation, get_simulation_list
 
 # Load environment variables
 ENV_PATH = Path(__file__).parent / ".env"
@@ -44,68 +45,26 @@ STRATEGIES = [
 ]
 
 # ═══════════════════════════════════════════════════════════════════════
-# TOPIC CONTENT (Time & Pendulums - Intermediate Level)
+# CURRENT SIMULATION SELECTION
 # ═══════════════════════════════════════════════════════════════════════
 
-TOPIC_TITLE = "Time & Pendulums"
+# Select which simulation to use (can be changed at runtime)
+CURRENT_SIMULATION_ID = os.getenv("SIMULATION_ID", "simple_pendulum")
 
-TOPIC_DESCRIPTION = """
-An interactive pendulum simulation where you can control pendulum length 
-and number of oscillations to demonstrate how time period is measured 
-and how it depends on length.
+# Load current simulation configuration dynamically
+_current_sim = get_simulation(CURRENT_SIMULATION_ID)
 
-What can be demonstrated:
-- Oscillatory motion (back and forth swinging)
-- Measurement of time using oscillations
-- Effect of pendulum length on time period
-- Difference between total time and time period
-- Stability of measurement using multiple oscillations
-"""
+if not _current_sim:
+    raise ValueError(f"Simulation '{CURRENT_SIMULATION_ID}' not found in simulations_config.py")
 
-# What this simulation CANNOT demonstrate (agent should NOT mention these)
-CANNOT_DEMONSTRATE = [
-    "Effect of mass on time period",
-    "Effect of gravity on time period",
-    "Damping or energy loss"
-]
-
-# Initial simulation parameters
-INITIAL_PARAMS = {
-    "length": 5,                    # 1-10 units
-    "number_of_oscillations": 10    # 5-50 count
-}
-
-# Parameter details for teacher reference
-PARAMETER_INFO = {
-    "length": {
-        "label": "Pendulum Length",
-        "range": "1-10 units",
-        "effect": "Longer = slower swings (longer period), Shorter = faster swings (shorter period)"
-    },
-    "number_of_oscillations": {
-        "label": "Oscillations to Observe",
-        "range": "5-50 count",
-        "effect": "More oscillations = more total time, but time period stays the same"
-    }
-}
-
-# Pre-defined concepts (Intermediate level from simulation design)
-PRE_DEFINED_CONCEPTS = [
-    {
-        "id": 1,
-        "title": "Time Period of a Pendulum",
-        "description": "How the length of a pendulum affects how long it takes to complete one swing.",
-        "key_insight": "Longer pendulum = longer time period (slower swings)",
-        "related_params": ["length"]
-    },
-    {
-        "id": 2,
-        "title": "Time Period vs Number of Oscillations",
-        "description": "Understanding that changing the number of oscillations changes total time but NOT the time period.",
-        "key_insight": "More oscillations = more total time, but time period stays the same",
-        "related_params": ["number_of_oscillations"]
-    }
-]
+# Export simulation-specific variables for backward compatibility
+TOPIC_TITLE = _current_sim["title"]
+TOPIC_DESCRIPTION = _current_sim["description"]
+CANNOT_DEMONSTRATE = _current_sim["cannot_demonstrate"]
+INITIAL_PARAMS = _current_sim["initial_params"]
+PARAMETER_INFO = _current_sim["parameter_info"]
+PRE_DEFINED_CONCEPTS = _current_sim["concepts"]
+SIMULATION_FILE = _current_sim["file"]
 
 # ═══════════════════════════════════════════════════════════════════════
 # VALIDATION
@@ -116,17 +75,45 @@ def validate_config():
     if not GOOGLE_API_KEY:
         raise ValueError("GOOGLE_API_KEY is not set in .env file")
     print(f"✅ Config loaded: Model={GEMINI_MODEL}, MaxExchanges={MAX_EXCHANGES}")
+    print(f"✅ Current Simulation: {TOPIC_TITLE} ({CURRENT_SIMULATION_ID})")
     return True
 
 # ═══════════════════════════════════════════════════════════════════════
-# SIMULATION URL
+# SIMULATION URL BUILDING
 # ═══════════════════════════════════════════════════════════════════════
 
-SIMULATION_BASE_URL = "https://imhv0609.github.io/simulation_to_concept_github/SimulationsNCERT-main/simple_pendulum.html"
-
-def build_simulation_url(params: dict, autostart: bool = True) -> str:
-    """Build simulation URL with parameters."""
-    url = f"{SIMULATION_BASE_URL}?length={params.get('length', 5)}&oscillations={params.get('number_of_oscillations', 10)}"
+def build_simulation_url(params: dict, autostart: bool = True, base_url: str = None) -> str:
+    """
+    Build simulation URL with parameters dynamically.
+    
+    Args:
+        params: Dictionary of parameters to pass to simulation
+        autostart: Whether to auto-start the simulation
+        base_url: Optional base URL override (for GitHub hosting)
+    
+    Returns:
+        Complete URL with query parameters
+    """
+    # Use provided base_url or construct from SIMULATION_FILE
+    if base_url is None:
+        # For local development, use relative path
+        base_url = SIMULATION_FILE
+    
+    # Build query string from parameters
+    query_params = []
+    for param_name, param_value in params.items():
+        # Get the URL key from PARAMETER_INFO
+        param_info = PARAMETER_INFO.get(param_name, {})
+        url_key = param_info.get("url_key", param_name)
+        query_params.append(f"{url_key}={param_value}")
+    
+    # Add autostart if requested
     if autostart:
-        url += "&autoStart=true"
+        query_params.append("autoStart=true")
+    
+    # Construct final URL
+    url = f"{base_url}?{'&'.join(query_params)}"
     return url
+
+# Legacy function for backward compatibility
+SIMULATION_BASE_URL = "simulations/simple_pendulum.html"

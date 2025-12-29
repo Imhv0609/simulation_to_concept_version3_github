@@ -95,6 +95,16 @@ class TeachingState(TypedDict):
     waiting_for_input: bool             # Paused for student response?
     needs_deeper: bool                  # Ask student to explain WHY (observation without reasoning)
     cannot_demonstrate: List[str]       # Topics NOT in this simulation (don't mention)
+    
+    # ═══════════════════════════════════════════════════════════════════════
+    # STUDENT RESPONSE TYPE FLAGS (set by evaluator)
+    # ═══════════════════════════════════════════════════════════════════════
+    student_asked_question: bool        # True if student asked a question
+    question_asked: str                 # The actual question they asked
+    student_requested_param: bool       # True if student requested param change
+    requested_param: str                # Which param they want to change
+    requested_value: Any                # What value they want
+    is_factually_wrong: bool            # True if student stated something incorrect
 
 
 def create_initial_state(topic_description: str, initial_params: Dict[str, float]) -> TeachingState:
@@ -140,7 +150,15 @@ def create_initial_state(topic_description: str, initial_params: Dict[str, float
         "session_complete": False,
         "waiting_for_input": False,
         "needs_deeper": False,
-        "cannot_demonstrate": []
+        "cannot_demonstrate": [],
+        
+        # Student response type flags
+        "student_asked_question": False,
+        "question_asked": "",
+        "student_requested_param": False,
+        "requested_param": "",
+        "requested_value": None,
+        "is_factually_wrong": False
     }
 
 
