@@ -19,7 +19,10 @@ from datetime import datetime
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage
 
-from config import GOOGLE_API_KEY, GEMINI_MODEL, TEMPERATURE, INITIAL_PARAMS
+from config import (
+    GOOGLE_API_KEY, GEMINI_MODEL, TEMPERATURE, INITIAL_PARAMS,
+    TOPIC_TITLE, TOPIC_DESCRIPTION, PARAMETER_INFO
+)
 from state import add_message_to_history
 
 

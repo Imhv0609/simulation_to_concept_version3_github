@@ -6,6 +6,11 @@ Easy to add new simulations here.
 """
 
 # =============================================================================
+# GITHUB PAGES BASE URL
+# =============================================================================
+GITHUB_PAGES_BASE = "https://imhv0609.github.io/simulation_to_concept_version3_github/simulations"
+
+# =============================================================================
 # SIMULATION CONFIGURATIONS
 # =============================================================================
 # Each simulation has:
@@ -16,9 +21,9 @@ Easy to add new simulations here.
 
 SIMULATIONS = {
     "simple_pendulum": {
-        "name": "Simple Pendulum",
+        "name": "Time & Pendulums",
         "description": "Explore how pendulum length affects time period",
-        "base_url": "https://imhv0609.github.io/simulation_to_concept_github/SimulationsNCERT-main/simple_pendulum.html",
+        "base_url": f"{GITHUB_PAGES_BASE}/simple_pendulum.html",
         "parameters": [
             {
                 "name": "length",
@@ -43,55 +48,80 @@ SIMULATIONS = {
         "topic": "Time & Pendulums"
     },
     
-    # =============================================================================
-    # TEMPLATE FOR ADDING NEW SIMULATIONS
-    # =============================================================================
-    # "acids_bases": {
-    #     "name": "Acids and Bases",
-    #     "description": "Explore pH and acid-base reactions",
-    #     "base_url": "https://imhvs0609.github.io/simulation_to_concept_github/SimulationsNCERT-main/acids%20bases.html",
-    #     "parameters": [
-    #         {
-    #             "name": "ph_level",
-    #             "display_name": "pH Level",
-    #             "default": 7,
-    #             "min": 0,
-    #             "max": 14,
-    #             "unit": "",
-    #             "url_param": "ph"
-    #         }
-    #     ],
-    #     "auto_start_param": "autoStart",
-    #     "topic": "Acids and Bases"
-    # },
+    "earth_rotation_revolution": {
+        "name": "Earth's Rotation & Revolution",
+        "description": "Explore day/night cycles, seasons, and axial tilt",
+        "base_url": f"{GITHUB_PAGES_BASE}/rotAndRev.html",
+        "parameters": [
+            {
+                "name": "rotationSpeed",
+                "display_name": "Rotation Speed",
+                "default": 50,
+                "min": 0,
+                "max": 100,
+                "unit": "%",
+                "url_param": "rotationSpeed"
+            },
+            {
+                "name": "axialTilt",
+                "display_name": "Axial Tilt",
+                "default": 23.5,
+                "min": 0,
+                "max": 30,
+                "unit": "°",
+                "url_param": "axialTilt"
+            },
+            {
+                "name": "revolutionSpeed",
+                "display_name": "Revolution Speed",
+                "default": 50,
+                "min": 0,
+                "max": 100,
+                "unit": "%",
+                "url_param": "revolutionSpeed"
+            }
+        ],
+        "auto_start_param": "autoStart",
+        "topic": "Earth's Rotation & Revolution"
+    },
     
-    # "fractions": {
-    #     "name": "Fractions",
-    #     "description": "Visualize fractions with pizza slices",
-    #     "base_url": "https://imhvs0609.github.io/simulation_to_concept_github/SimulationsNCERT-main/fractions.html",
-    #     "parameters": [
-    #         {
-    #             "name": "numerator",
-    #             "display_name": "Numerator",
-    #             "default": 1,
-    #             "min": 1,
-    #             "max": 12,
-    #             "unit": "",
-    #             "url_param": "num"
-    #         },
-    #         {
-    #             "name": "denominator",
-    #             "display_name": "Denominator", 
-    #             "default": 4,
-    #             "min": 1,
-    #             "max": 12,
-    #             "unit": "",
-    #             "url_param": "denom"
-    #         }
-    #     ],
-    #     "auto_start_param": "autoStart",
-    #     "topic": "Fractions"
-    # },
+    "light_shadows": {
+        "name": "Light & Shadows",
+        "description": "Explore how light creates shadows and shadow properties",
+        "base_url": f"{GITHUB_PAGES_BASE}/lightsShadows.html",
+        "parameters": [
+            {
+                "name": "lightDistance",
+                "display_name": "Light Distance",
+                "default": 5,
+                "min": 1,
+                "max": 10,
+                "unit": "units",
+                "url_param": "lightDistance"
+            },
+            {
+                "name": "objectType",
+                "display_name": "Object Type",
+                "default": "Opaque",
+                "min": None,
+                "max": None,
+                "unit": "",
+                "url_param": "objectType",
+                "options": ["Opaque", "Translucent", "Transparent"]
+            },
+            {
+                "name": "objectSize",
+                "display_name": "Object Size",
+                "default": 5,
+                "min": 1,
+                "max": 10,
+                "unit": "units",
+                "url_param": "objectSize"
+            }
+        ],
+        "auto_start_param": "autoStart",
+        "topic": "Light & Shadows"
+    }
 }
 
 # =============================================================================

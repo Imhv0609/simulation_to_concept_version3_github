@@ -26,7 +26,7 @@ try:
         build_simulation_url
     )
     from state import create_initial_state, TeachingState
-    from graph import start_session, continue_session, get_session_state
+    from graph import continue_session, get_session_state
     
     BACKEND_AVAILABLE = True
     
@@ -55,8 +55,43 @@ def create_new_session() -> Tuple[str, Dict[str, Any]]:
     if not BACKEND_AVAILABLE:
         raise RuntimeError("Backend not available")
     
+    # Reload ALL modules to pick up environment variable changes
+    import importlib
+    import simulations_config
+    import config
+    import state as state_module
+    import graph as graph_module
+    from nodes import teacher, evaluator, strategy, trajectory, content_loader
+    
+    # Reload in dependency order (most fundamental first)
+    importlib.reload(simulations_config)
+    importlib.reload(config)
+    importlib.reload(content_loader)
+    importlib.reload(teacher)
+    importlib.reload(evaluator)
+    importlib.reload(strategy)
+    importlib.reload(trajectory)
+    importlib.reload(state_module)
+    importlib.reload(graph_module)
+    
+    # Import fresh functions and values after reload
+    from config import (
+        validate_config,
+        TOPIC_DESCRIPTION,
+        INITIAL_PARAMS,
+        TOPIC_TITLE,
+        CURRENT_SIMULATION_ID
+    )
+    from state import create_initial_state
+    from graph import start_session, reset_graph
+    
+    # Reset the graph to force recompile with new nodes
+    reset_graph()
+    
     # Validate config
     validate_config()
+    
+    print(f"🔄 Creating session for: {TOPIC_TITLE} ({CURRENT_SIMULATION_ID})")
     
     # Create unique session ID
     thread_id = f"streamlit_session_{uuid.uuid4().hex[:8]}"
@@ -87,7 +122,10 @@ def send_student_response(thread_id: str, response: str) -> Dict[str, Any]:
     if not BACKEND_AVAILABLE:
         raise RuntimeError("Backend not available")
     
-    state = continue_session(response, thread_id)
+    # Import fresh continue_session to ensure we're using the reloaded graph
+    from graph import continue_session as fresh_continue_session
+    
+    state = fresh_continue_session(response, thread_id)
     return state
 
 
@@ -104,7 +142,10 @@ def get_current_state(thread_id: str) -> Dict[str, Any]:
     if not BACKEND_AVAILABLE:
         return {}
     
-    return get_session_state(thread_id)
+    # Import fresh to ensure we're using the reloaded graph
+    from graph import get_session_state as fresh_get_session_state
+    
+    return fresh_get_session_state(thread_id)
 
 
 def extract_display_data(state: Dict[str, Any]) -> Dict[str, Any]:
@@ -134,12 +175,21 @@ def extract_display_data(state: Dict[str, Any]) -> Dict[str, Any]:
     # Check if there was a recent parameter change (within the last response)
     if param_history:
         last_change = param_history[-1]
+        # Debug: print param change info
+        print(f"   🔎 DEBUG - Last param change: {last_change.get('parameter')} = {last_change.get('old_value')} → {last_change.get('new_value')}")
+        print(f"   🔎 DEBUG - student_reaction: '{last_change.get('student_reaction', '')}'")
+        
         # Only show comparison if the student hasn't reacted yet (empty reaction)
         if last_change.get("student_reaction", "") == "":
             has_param_change = True
             # Reconstruct previous params
             previous_params = current_params.copy()
             previous_params[last_change["parameter"]] = last_change["old_value"]
+            print(f"   ✅ DEBUG - Will show simulation comparison!")
+        else:
+            print(f"   ❌ DEBUG - student_reaction filled, no comparison")
+    else:
+        print(f"   🔎 DEBUG - No param_history yet")
     
     return {
         # Teacher message

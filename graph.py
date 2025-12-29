@@ -122,11 +122,15 @@ def create_teaching_graph() -> StateGraph:
     return workflow
 
 
-def compile_graph():
+def compile_graph(force_recompile: bool = False):
     """Compile graph with checkpointer and interrupt points (singleton)."""
-    global _compiled_graph
+    global _compiled_graph, _checkpointer
     
-    if _compiled_graph is None:
+    if _compiled_graph is None or force_recompile:
+        # Reset checkpointer when recompiling to avoid session conflicts
+        if force_recompile:
+            _checkpointer = MemorySaver()
+        
         print("\n" + "="*60)
         print("🔧 COMPILING TEACHING GRAPH")
         print("="*60)
@@ -143,6 +147,14 @@ def compile_graph():
         print("   • Flow: content_loader → teacher → [WAIT] → evaluator → trajectory → strategy → [loop/END]")
     
     return _compiled_graph
+
+
+def reset_graph():
+    """Force reset the compiled graph. Call this when simulation changes."""
+    global _compiled_graph, _checkpointer
+    _compiled_graph = None
+    _checkpointer = MemorySaver()
+    print("🔄 Graph reset - will recompile on next use")
 
 
 # ═══════════════════════════════════════════════════════════════════════════

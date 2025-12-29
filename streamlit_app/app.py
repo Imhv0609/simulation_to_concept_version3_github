@@ -149,6 +149,10 @@ def process_student_response(user_input: str):
         
         # Check for parameter changes (before/after comparison)
         simulation_data = None
+        print(f"\n📊 UI DEBUG - has_param_change: {display_data['has_param_change']}")
+        print(f"📊 UI DEBUG - current_params: {display_data['current_params']}")
+        print(f"📊 UI DEBUG - previous_params: {display_data['previous_params']}")
+        
         if display_data["has_param_change"]:
             st.session_state.previous_params = display_data["previous_params"]
             st.session_state.simulation_params = display_data["current_params"]
@@ -158,9 +162,11 @@ def process_student_response(user_input: str):
                 "before_params": display_data["previous_params"],
                 "after_params": display_data["current_params"]
             }
+            print(f"📊 UI DEBUG - simulation_data SET: {simulation_data}")
         else:
             st.session_state.simulation_params = display_data["current_params"]
             st.session_state.show_simulation_comparison = False
+            print(f"📊 UI DEBUG - simulation_data NOT set (no param change)")
         
         # Check for concept change
         current_idx = display_data["current_concept_index"]
@@ -351,13 +357,14 @@ def render_chat_with_simulations():
                     if changes:
                         st.info("📊 **Parameter Change:** " + " | ".join(changes))
                     
-                    # Side by side simulations
+                    # Side by side simulations - use current simulation key
+                    current_sim_key = st.session_state.current_simulation
                     col1, col2 = st.columns(2)
                     
                     with col1:
                         st.markdown("#### ⬅️ Before")
                         render_simulation_single(
-                            sim_key="simple_pendulum",
+                            sim_key=current_sim_key,
                             params=before_params,
                             title=""
                         )
@@ -365,7 +372,7 @@ def render_chat_with_simulations():
                     with col2:
                         st.markdown("#### ➡️ After")
                         render_simulation_single(
-                            sim_key="simple_pendulum",
+                            sim_key=current_sim_key,
                             params=after_params,
                             title=""
                         )

@@ -18,7 +18,7 @@ It uses:
 
 from typing import Dict, Any, List
 
-from config import MAX_EXCHANGES, SCAFFOLD_TRIGGER
+from config import MAX_EXCHANGES, SCAFFOLD_TRIGGER, PARAMETER_INFO
 
 
 def analyze_param_effectiveness(param_history: List[dict]) -> dict:
@@ -32,7 +32,8 @@ def analyze_param_effectiveness(param_history: List[dict]) -> dict:
             "untried_params": ["gravity", ...]
         }
     """
-    all_params = {"length", "number_of_oscillations"}
+    # Get all params from current simulation config instead of hardcoding
+    all_params = set(PARAMETER_INFO.keys())
     tried_params = set()
     effective = set()
     ineffective = set()

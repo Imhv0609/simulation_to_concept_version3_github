@@ -25,7 +25,10 @@ from datetime import datetime
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from config import GOOGLE_API_KEY, GEMINI_MODEL, TEMPERATURE, CANNOT_DEMONSTRATE, PARAMETER_INFO
+from config import (
+    GOOGLE_API_KEY, GEMINI_MODEL, TEMPERATURE, CANNOT_DEMONSTRATE, 
+    PARAMETER_INFO, TOPIC_TITLE, TOPIC_DESCRIPTION
+)
 from state import add_message_to_history
 
 
@@ -149,7 +152,7 @@ def teacher_node(state: Dict[str, Any]) -> Dict[str, Any]:
     if current_idx >= len(concepts):
         # All concepts complete
         return {
-            "last_teacher_message": "Excellent work! We've covered all the key concepts. You've done a wonderful job exploring the pendulum! 🎉",
+            "last_teacher_message": f"Excellent work! We've covered all the key concepts. You've done a wonderful job exploring {TOPIC_TITLE}! 🎉",
             "session_complete": True,
             "waiting_for_input": False
         }
@@ -189,8 +192,24 @@ def teacher_node(state: Dict[str, Any]) -> Dict[str, Any]:
     if needs_clarification:
         print(f"   🔄 Clarification requested")
     
+    # Build dynamic simulation info from config
+    current_params_str = ", ".join([
+        f"{info['label']}={current_params.get(key, '?')}"
+        for key, info in PARAMETER_INFO.items()
+    ])
+    
+    available_params_str = "\n".join([
+        f"- {key}: {info['range']} ({info['effect']})"
+        for key, info in PARAMETER_INFO.items()
+    ])
+    
+    cannot_demonstrate_str = "\n".join([f"- {item}" for item in CANNOT_DEMONSTRATE])
+    
     # Build the teaching prompt
-    system_prompt = f"""You are a warm, engaging physics teacher named Alex. You're teaching a student about the simple pendulum through an interactive simulation.
+    system_prompt = f"""You are a warm, engaging science teacher named Alex. You're teaching a student about {TOPIC_TITLE} through an interactive simulation.
+
+TOPIC DETAILS:
+{TOPIC_DESCRIPTION}
 
 ⚠️ CRITICAL: You MUST respond with ONLY a valid JSON object. No extra text before or after.
 Your response must start with {{ and end with }}.
@@ -215,31 +234,22 @@ CURRENT TEACHING STRATEGY: {strategy}
 {"- Summarize the key point and prepare to move on" if strategy == "summarize_advance" else ""}
 
 SIMULATION INFO:
-Current parameters: Length={current_params.get('length', 5)} units, Oscillations={current_params.get('number_of_oscillations', 10)} count
+Current parameters: {current_params_str}
 
 Available parameters:
-- length: 1-10 units (affects time period - longer = slower swings)
-- number_of_oscillations: 5-50 count (affects total time, NOT period)
+{available_params_str}
 
 ⚠️ IMPORTANT - DO NOT MENTION THESE (not in this simulation):
-- Mass (this simulation does not include mass)
-- Gravity (this simulation does not include gravity)  
-- Damping or energy loss
+{cannot_demonstrate_str}
 
 CRITICAL RULES FOR ASKING QUESTIONS:
 1. **ALWAYS end with ONE specific, answerable question**
-2. **Give options when asking for predictions**: "Will it swing faster or slower?", "Longer or shorter period?"
-3. **Be explicit about what you want**: "What do you think will happen to the TIME it takes to complete one swing?"
+2. **Give options when asking for predictions**: e.g., "Will it be bigger or smaller?", "More or less?"
+3. **Be explicit about what you want**: Ask about specific observable effects
 4. **Avoid vague prompts** like "what do you think?" without context
 5. Keep responses concise (2-3 sentences + 1 clear question)
 6. When suggesting a parameter change, ask for prediction with options FIRST
 7. Use "friend" occasionally for warmth
-
-EXAMPLES OF GOOD SPECIFIC QUESTIONS:
-- "If we make the pendulum longer, will it swing faster or slower?"
-- "What do you think happens to the time period - does it increase or decrease?"
-- "Will changing the mass affect how fast it swings, or will it stay the same?"
-- "That's right! Can you tell me WHY the period gets longer with more length?"
 
 EXAMPLES OF BAD VAGUE QUESTIONS (AVOID):
 - "What do you think about that?"
@@ -258,6 +268,11 @@ EXAMPLES OF BAD VAGUE QUESTIONS (AVOID):
         
         if previous_concept:
             # We just completed a concept - summarize it and introduce the new one
+            # Check if new concept has different related params - if so, we should change one
+            new_params = current_concept.get('related_params', [])
+            should_change = len(new_params) > 0
+            suggested_param = new_params[0] if new_params else None
+            
             user_prompt = f"""
 PREVIOUS CONCEPT (just completed):
 Title: {previous_concept['title']}
@@ -271,21 +286,23 @@ Relevant Parameters: {current_concept['related_params']}
 The student just demonstrated understanding of the previous concept. Your job is to:
 1. FIRST: Celebrate and SUMMARIZE what they just learned (1-2 sentences confirming the key insight)
 2. THEN: Smoothly transition to the new concept
-3. End with a question or prediction about the new concept
+3. **IMPORTANT**: Change a parameter to set up the new concept (e.g., change "{suggested_param}" to demonstrate the new concept)
+4. End with a question or prediction about the new concept
 
 Example structure:
 "Great job! You've discovered that [key insight from previous concept]. 
-Now let's explore [new concept]. [engaging intro]... 
-What do you think will happen if [question with options]?"
+Now let's explore [new concept]. I'm going to change [parameter] to [value].
+PREDICT: What do you think will happen?"
 
 ⚠️ RESPOND WITH ONLY THIS JSON FORMAT (no other text):
 ```json
 {{
-    "teacher_message": "Your message that summarizes previous + introduces new...",
-    "suggests_param_change": false,
-    "param_to_change": null,
-    "new_value": null,
-    "prediction_question": null
+    "teacher_message": "Your message that summarizes previous + introduces new with a parameter change...",
+    "suggests_param_change": {str(should_change).lower()},
+    "param_to_change": "{suggested_param}",
+    "new_value": <pick a good value from the parameter's range>,
+    "change_reason": "To demonstrate the new concept",
+    "prediction_question": "What do you think will happen?"
 }}
 ```
 """
@@ -332,18 +349,12 @@ The student asked: "{question_asked}"
 ⚠️ DO NOT say "before we dive into that..." or "let's see first..."
 ⚠️ ANSWER FIRST, then continue teaching
 
-ANSWER THESE DIRECTLY:
-- "What is time period?" → "Time period is the time for one complete swing (back and forth)."
-- "What is the formula?" → "The formula is T = 2π√(L/g), where T is time period, L is length, and g is gravity (about 10 m/s²)."
-- "Why does length affect it?" → "Because a longer pendulum has to travel a longer arc, so it takes more time."
+Use the topic description and parameter info provided to answer accurately.
 
 YOUR RESPONSE FORMAT:
 1. FIRST: Answer the question directly (2-3 sentences)
 2. THEN: Optionally connect to what we're learning
-3. FINALLY: Ask a follow-up question
-
-Example for "What is the formula?":
-"Great question! The formula for time period is T = 2π√(L/g). This tells us that time period depends only on length (L) and gravity (g) - not on mass! Notice how length is under a square root, which means doubling the length increases the period by about 1.4 times (√2). Based on this, if we make the pendulum shorter, will the period increase or decrease?"
+3. FINALLY: Ask a follow-up question to continue teaching
 """
 
         # Build instruction for student's PARAMETER REQUEST
@@ -362,14 +373,11 @@ The student wants to change: {requested_param}
 YOU MUST:
 1. ACKNOWLEDGE positively: "Sure!" or "Great idea!" or "Let's try that!"
 2. CONFIRM you're making their requested change (not a different one)
-3. GUIDE observation: "OBSERVE: What do you notice about the swing speed now?"
-
-Example response (if they asked for length=3):
-"Sure, let's try that! I've set the length to 3 units as you requested. OBSERVE: Watch the simulation now - is the pendulum swinging faster or slower than before?"
+3. GUIDE observation: "OBSERVE: What do you notice now?"
 
 DO NOT DO THIS (wrong):
 ❌ "Not quite, friend. Actually..." - This is for WRONG ANSWERS, not requests!
-❌ "Let me change it to 2 instead..." - Respect their choice!
+❌ "Let me change it to something else instead..." - Respect their choice!
 ❌ "But first let's..." - Don't delay or redirect!
 """
 
@@ -380,7 +388,7 @@ DO NOT DO THIS (wrong):
 ⚠️⚠️⚠️ STUDENT GAVE A FACTUALLY WRONG ANSWER - MUST CORRECT ⚠️⚠️⚠️
 The student stated something that is INCORRECT. You MUST:
 1. POLITELY but CLEARLY tell them they are wrong: "Not quite, friend." or "Actually, that's not correct."
-2. STATE the correct fact: "A longer pendulum actually swings SLOWER, not faster."
+2. STATE the correct fact based on the topic and parameter effects
 3. OFFER to demonstrate: "Let me show you with the simulation..."
 
 DO NOT:
@@ -401,8 +409,8 @@ DO:
 ⚠️ STUDENT GAVE CORRECT OBSERVATION BUT NO REASONING:
 They said WHAT happens correctly, but didn't explain WHY. Your job is to:
 1. CELEBRATE their correct observation ("Exactly right!" or "Great observation!")
-2. ASK them WHY they think that happens: "Can you think of WHY a longer pendulum takes more time?"
-3. Give a hint if helpful: "Think about the path the pendulum has to travel..."
+2. ASK them WHY they think that happens
+3. Give a hint if helpful based on the concept's key insight
 This is NOT a correction - they're on the right track! Just need them to think deeper.
 """
         
@@ -448,7 +456,7 @@ IF understanding is "none" AND student gave a WRONG answer (not just "I don't kn
 - Do NOT say: "Good thinking!", "Right direction!", "That's a reasonable thought!"
 - Do NOT say: "You're onto something!", "Close!", "Almost!"
 - DO say: "Not quite, friend." or "Actually, that's not correct."
-- THEN explain: "A longer pendulum actually swings SLOWER, not faster. Let me show you..."
+- THEN explain the correct answer based on the concept being taught
 - Be KIND but HONEST - false praise confuses students!
 
 IF student said "I don't know":
@@ -459,8 +467,8 @@ IF student is CORRECT:
 - Praise appropriately: "Exactly right!" or "Great observation!"
 
 EXAMPLES:
-❌ WRONG (don't do this): "Good thinking! But actually longer pendulums swing slower..."
-✅ RIGHT: "Not quite, friend. Longer pendulums actually swing SLOWER, not faster. Let me show you why..."
+❌ WRONG (don't do this): "Good thinking! But actually the opposite happens..."
+✅ RIGHT: "Not quite, friend. [Correct fact]. Let me show you why..."
 
 ❌ WRONG: "You're on the right track! Though the answer is actually the opposite..."
 ✅ RIGHT: "Actually, that's the opposite of what happens. Let me demonstrate..."
@@ -469,13 +477,13 @@ RULE 2 - ALWAYS BE SPECIFIC ABOUT WHAT YOU WANT:
 Every response MUST end with a CLEAR ACTION for the student. Use these formats:
 
 For PREDICTIONS (before changing parameter):
-"I'm going to change the length to 2m. PREDICT: Will the pendulum swing faster or slower?"
+"I'm going to change [parameter]. PREDICT: What do you think will happen?"
 
 For OBSERVATIONS (after changing parameter):
-"Watch the simulation now. OBSERVE: What do you notice about the swing speed?"
+"Watch the simulation now. OBSERVE: What do you notice?"
 
 For EXPLANATIONS:
-"EXPLAIN: Why do you think a longer pendulum takes more time?"
+"EXPLAIN: Why do you think that happens?"
 
 RULE 3 - ONE CLEAR QUESTION:
 - End with exactly ONE question
@@ -496,14 +504,10 @@ The simulation is your BEST teaching tool! When student is stuck:
 You MUST change a parameter to help them SEE the concept!
 
 Example flow:
-1. "Let me show you! I'm changing the length from 1m to 2m."
-2. "OBSERVE: Watch the pendulum now. Does it swing faster or slower than before?"
+1. "Let me show you! I'm changing [parameter] to [value]."
+2. "OBSERVE: Watch the simulation now. What do you notice?"
 
-**Choose the right parameter for the concept:**
-- Concept about LENGTH → change length (e.g., 1.0 to 2.0)
-- Concept about GRAVITY → change gravity (e.g., 9.8 to 4.9 or 19.8)
-- Concept about MASS → change mass (e.g., 1.0 to 2.0)
-- Concept about ANGLE → change angle (e.g., 15 to 30)
+**Choose the right parameter for the concept using the related_params list.**
 
 **Current concept: {current_concept['title']}**
 **Related parameters: {current_concept['related_params']}**
