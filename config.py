@@ -79,6 +79,27 @@ def validate_config():
     return True
 
 # ═══════════════════════════════════════════════════════════════════════
+# SIMULATION HOSTING CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════
+
+# GitHub Pages base URL (set in .env for production, None for local dev)
+GITHUB_PAGES_BASE_URL = os.getenv("GITHUB_PAGES_BASE_URL", None)
+
+def get_simulation_base_url() -> str:
+    """
+    Get the base URL for simulations based on environment.
+    
+    Returns GitHub Pages URL if GITHUB_PAGES_BASE_URL is set,
+    otherwise returns relative path for local development.
+    """
+    if GITHUB_PAGES_BASE_URL:
+        # Production: Use GitHub Pages
+        return f"{GITHUB_PAGES_BASE_URL}/{SIMULATION_FILE}"
+    else:
+        # Local development: Use relative path
+        return SIMULATION_FILE
+
+# ═══════════════════════════════════════════════════════════════════════
 # SIMULATION URL BUILDING
 # ═══════════════════════════════════════════════════════════════════════
 
@@ -89,15 +110,14 @@ def build_simulation_url(params: dict, autostart: bool = True, base_url: str = N
     Args:
         params: Dictionary of parameters to pass to simulation
         autostart: Whether to auto-start the simulation
-        base_url: Optional base URL override (for GitHub hosting)
+        base_url: Optional base URL override (for custom hosting)
     
     Returns:
         Complete URL with query parameters
     """
-    # Use provided base_url or construct from SIMULATION_FILE
+    # Use provided base_url, or get from environment, or use relative path
     if base_url is None:
-        # For local development, use relative path
-        base_url = SIMULATION_FILE
+        base_url = get_simulation_base_url()
     
     # Build query string from parameters
     query_params = []
@@ -115,5 +135,5 @@ def build_simulation_url(params: dict, autostart: bool = True, base_url: str = N
     url = f"{base_url}?{'&'.join(query_params)}"
     return url
 
-# Legacy function for backward compatibility
-SIMULATION_BASE_URL = "simulations/simple_pendulum.html"
+# Legacy variable for backward compatibility
+SIMULATION_BASE_URL = get_simulation_base_url()
