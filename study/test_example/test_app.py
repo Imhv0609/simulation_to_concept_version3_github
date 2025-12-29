@@ -64,7 +64,7 @@ with col1:
     # Choose how to load the simulation
     load_method = st.radio(
         "How to load simulation:",
-        ["From local file", "From URL"],
+        ["From URL", "From local file"],
         horizontal=True
     )
     
@@ -80,7 +80,7 @@ with col1:
         # Let user enter a URL (useful if they host it somewhere)
         simulation_url = st.text_input(
             "Enter simulation URL:",
-            value="https://your-github-pages-url/test_simulation.html"
+            value="https://imhv0609.github.io/simulation_to_concept_version3_github/study/test_example/test_simulation.html"
         )
     
     st.info(f"**Loading from:** `{simulation_url}`")
