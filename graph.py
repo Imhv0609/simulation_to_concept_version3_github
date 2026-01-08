@@ -40,11 +40,18 @@ Graph Flow:
 """
 
 from typing import Dict, Any
+import os
+import dotenv
 
 from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.memory import MemorySaver
+from langgraph.checkpoint.postgres import PostgresSaver
+from psycopg_pool import ConnectionPool
 
 from state import TeachingState
+
+# Load environment variables
+dotenv.load_dotenv(dotenv_path=".env", override=True)
 from nodes import (
     content_loader_node,
     teacher_node,
@@ -55,11 +62,59 @@ from nodes import (
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# GLOBAL CHECKPOINTER
+# GLOBAL CHECKPOINTER (PostgreSQL)
 # ═══════════════════════════════════════════════════════════════════════════
 
-_checkpointer = MemorySaver()
 _compiled_graph = None
+
+# Initialize PostgreSQL checkpointer
+def _init_checkpointer():
+    """Initialize PostgreSQL checkpointer with connection pool."""
+    try:
+        connection_kwargs = {
+            "autocommit": True,  # Required for Transaction Mode
+            "prepare_threshold": None,  # None = Never use prepared statements (required for Transaction Mode)
+            "gssencmode": "disable",  # Prevents GSSAPI negotiation issues
+        }
+        
+        postgres_url = os.getenv('POSTGRES_DATABASE_URL')
+        print(f"🔍 Initializing Postgres checkpointer...")
+        
+        if not postgres_url:
+            print("⚠️  POSTGRES_DATABASE_URL not set - falling back to MemorySaver")
+            return MemorySaver()
+        
+        # Skip table setup (assume tables exist)
+        skip_setup = os.getenv('SKIP_POSTGRES_SETUP', 'true').lower() == 'true'
+        
+        pool = ConnectionPool(
+            conninfo=postgres_url,
+            max_size=40,  # Stay within Supabase Transaction Mode limits
+            min_size=5,   # Reduced for Transaction Mode efficiency
+            timeout=30,   # Wait up to 30s for available connection
+            max_idle=300,        # Close connections idle > 5 min
+            max_lifetime=1800,   # Recycle ALL connections every 30 min
+            reconnect_timeout=30,  # Retry failed connections for up to 30s
+            kwargs=connection_kwargs,
+        )
+        checkpointer = PostgresSaver(pool)
+        
+        if not skip_setup:
+            print("🔧 Running checkpointer.setup() to create tables...")
+            checkpointer.setup()  # Create tables if they don't exist
+            print("✅ Tables created/verified")
+        else:
+            print("⏭️  Skipping table setup (assuming tables exist)")
+        
+        print("✅ Postgres checkpointer initialized successfully")
+        return checkpointer
+        
+    except Exception as e:
+        print(f"❌ Error initializing Postgres checkpointer: {e}")
+        print(f"💡 Falling back to MemorySaver (in-memory, non-persistent)")
+        return MemorySaver()
+
+_checkpointer = _init_checkpointer()
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -141,8 +196,9 @@ def compile_graph(force_recompile: bool = False):
             interrupt_before=["evaluator"]  # Pause before evaluation to get student input
         )
         
+        checkpointer_type = "PostgresSaver" if isinstance(_checkpointer, PostgresSaver) else "MemorySaver"
         print("✅ Graph compiled with:")
-        print("   • MemorySaver checkpointer")
+        print(f"   • {checkpointer_type} checkpointer")
         print("   • Interrupt before evaluator (for student input)")
         print("   • Flow: content_loader → teacher → [WAIT] → evaluator → trajectory → strategy → [loop/END]")
     
@@ -153,7 +209,7 @@ def reset_graph():
     """Force reset the compiled graph. Call this when simulation changes."""
     global _compiled_graph, _checkpointer
     _compiled_graph = None
-    _checkpointer = MemorySaver()
+    _checkpointer = _init_checkpointer()
     print("🔄 Graph reset - will recompile on next use")
 
 
