@@ -1,9 +1,14 @@
 # Streamlit App Requirements
 streamlit>=1.30.0
 
-# Backend dependencies (also install from parent requirements.txt)
+# Backend dependencies
 langgraph>=0.2.0
 langchain>=0.3.0
 langchain-google-genai>=2.0.0
 langchain-core>=0.3.0
+langsmith>=0.1.0
 python-dotenv>=1.0.0
+
+# Database (PostgreSQL for checkpointer)
+psycopg2-binary>=2.9.9
+psycopg>=3.1.18
