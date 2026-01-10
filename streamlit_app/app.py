@@ -32,7 +32,12 @@ from components.chat import (
     add_message_to_chat,
     clear_chat,
     add_concept_change_marker,
-    format_teacher_message
+    format_teacher_message,
+    render_quiz_question,
+    render_quiz_submit_button,
+    render_quiz_evaluation,
+    render_quiz_progress,
+    render_quiz_complete
 )
 from streamlit_config import get_default_params, UI_CONFIG
 
@@ -43,7 +48,8 @@ from backend_integration import (
     send_student_response,
     get_current_state,
     extract_display_data,
-    get_initial_params
+    get_initial_params,
+    submit_quiz_answer
 )
 
 # Page config
@@ -194,6 +200,161 @@ def process_student_response(user_input: str):
         return None
 
 
+def sync_conversation_to_chat(state: dict):
+    """
+    Sync conversation history from backend state to Streamlit chat messages.
+    Only adds messages that aren't already in the chat.
+    """
+    conversation_history = state.get("conversation_history", [])
+    current_chat_count = len(st.session_state.chat_messages)
+    
+    # Add any new messages from conversation history
+    for i, msg in enumerate(conversation_history):
+        if i >= current_chat_count:
+            # This is a new message, add it to chat
+            role = msg.get("role", "system")
+            content = msg.get("content", "")
+            timestamp = msg.get("timestamp", "")
+            
+            if role == "teacher" and content:
+                formatted_content = format_teacher_message(content)
+                add_message_to_chat("teacher", formatted_content)
+
+
+def skip_to_quiz_mode():
+    """
+    Skip teaching phase and jump directly to quiz mode for testing.
+    Invokes the graph starting from quiz_initializer node directly.
+    """
+    if not is_backend_available():
+        st.error("❌ Backend is not available.")
+        return False
+    
+    try:
+        from graph import compile_graph
+        from simulations_config import get_quiz_questions, get_simulation
+        from nodes.quiz_evaluator import quiz_initializer_node, quiz_teacher_node
+        import os
+        import uuid
+        
+        # Clear existing state
+        clear_chat()
+        
+        # Create a new thread ID
+        thread_id = f"quiz_test_{uuid.uuid4().hex[:8]}"
+        
+        # Get simulation ID and config
+        simulation_id = os.environ.get("SIMULATION_ID", "simple_pendulum")
+        simulation_config = get_simulation(simulation_id)
+        
+        # Compile graph (for checkpointer access)
+        graph = compile_graph()
+        config = {"configurable": {"thread_id": thread_id}}
+        
+        print(f"\n🧪 SKIP TO QUIZ - Thread: {thread_id}")
+        print(f"   Manually running quiz nodes...")
+        
+        # Create minimal initial state
+        initial_state = {
+            # Concepts - mark as fully taught
+            "concepts": simulation_config.get("concepts", []),
+            "current_concept_index": len(simulation_config.get("concepts", [])),
+            
+            # Teaching state (completed)
+            "understanding_level": "complete",
+            "trajectory_status": "improving",
+            "exchange_count": 0,
+            "max_exchange_per_concept": 6,
+            "student_response": "",
+            "student_reaction": "",
+            "response_classification": "acknowledgment",
+            "concept_complete": True,
+            
+            # Quiz mode - will be set by quiz_initializer
+            "quiz_mode": False,
+            "quiz_questions": [],
+            "current_quiz_index": 0,
+            "quiz_attempts": {},
+            "quiz_scores": {},
+            "quiz_complete": False,
+            "submitted_parameters": {},
+            "quiz_evaluation": {},
+            
+            # Session state
+            "session_complete": False,
+            "last_teacher_message": "",
+            "conversation_history": [],
+            
+            # Strategy
+            "strategy": "summarize_advance",
+            "mode": "encouraging",
+            "scaffold_needed": False,
+            "advance_concept": True,
+            
+            # Params
+            "current_params": get_initial_params(),
+            "previous_params": None,
+            "param_history": [],
+            "param_change_effective": False,
+            "effective_params": [],
+            
+            # Misc
+            "trajectory": [],
+            "cannot_demonstrate": simulation_config.get("cannot_demonstrate", []),
+        }
+        
+        # Manually run quiz_initializer_node
+        print("   Running quiz_initializer_node...")
+        init_updates = quiz_initializer_node(initial_state)
+        
+        # Merge updates into state
+        for key, value in init_updates.items():
+            initial_state[key] = value
+        
+        print(f"   Quiz questions loaded: {len(initial_state.get('quiz_questions', []))}")
+        
+        # Manually run quiz_teacher_node
+        print("   Running quiz_teacher_node...")
+        teacher_updates = quiz_teacher_node(initial_state)
+        
+        # Merge updates into state
+        for key, value in teacher_updates.items():
+            initial_state[key] = value
+        
+        # Now save this state to the graph's checkpointer
+        # Use update_state with as_node to set the checkpoint at quiz_teacher
+        graph.update_state(config, initial_state, as_node="quiz_teacher")
+        
+        # Get the final state
+        final_state = graph.get_state(config)
+        
+        # Debug: Print next nodes
+        print(f"   DEBUG: next nodes = {final_state.next}")
+        print(f"   DEBUG: checkpoint tasks = {len(final_state.tasks) if final_state.tasks else 0}")
+        
+        # Store in session state
+        st.session_state.thread_id = thread_id
+        st.session_state.backend_state = final_state.values
+        st.session_state.session_started = True
+        st.session_state.simulation_params = final_state.values.get("current_params", get_initial_params())
+        
+        # Add messages to chat from conversation history
+        for msg in final_state.values.get("conversation_history", []):
+            if msg.get("role") == "teacher":
+                add_message_to_chat("teacher", msg.get("content", ""))
+        
+        print(f"   ✅ Quiz mode activated!")
+        print(f"   State saved at quiz_teacher node (waiting for submission)")
+        
+        return True
+        
+    except Exception as e:
+        st.error(f"❌ Failed to skip to quiz: {e}")
+        import traceback
+        st.error(traceback.format_exc())
+        return False
+
+
 def render_header():
     """Render the app header."""
     st.markdown("""
@@ -240,13 +401,23 @@ def render_sidebar():
         if st.session_state.backend_state:
             display_data = extract_display_data(st.session_state.backend_state)
             
-            render_progress_bar(
-                display_data["current_concept_index"],
-                display_data["total_concepts"],
-                display_data["understanding_level"]
-            )
-            
-            st.markdown("---")
+            # Check if in quiz mode
+            if display_data.get("quiz_mode", False):
+                st.markdown("### 🎯 Quiz Mode")
+                render_quiz_progress(
+                    display_data["quiz_scores"],
+                    len(display_data["quiz_questions"]),
+                    display_data["current_quiz_index"]
+                )
+                st.markdown("---")
+            else:
+                # Regular teaching mode progress
+                render_progress_bar(
+                    display_data["current_concept_index"],
+                    display_data["total_concepts"],
+                    display_data["understanding_level"]
+                )
+                st.markdown("---")
             
             # Current concept info
             if display_data["current_concept"]:
@@ -305,6 +476,11 @@ def render_sidebar():
             st.session_state.show_simulation_comparison = False
             st.session_state.last_concept_shown = -1
             st.session_state.simulation_params = get_initial_params()
+            st.rerun()
+        
+        # Testing shortcut - Skip directly to Quiz mode
+        if st.button("🧪 Skip to Quiz (Testing)", use_container_width=True, help="Skip teaching and test quiz directly"):
+            skip_to_quiz_mode()
             st.rerun()
         
         # Backend status
@@ -466,6 +642,110 @@ def main():
         # Check if session is complete
         if st.session_state.backend_state:
             display_data = extract_display_data(st.session_state.backend_state)
+            
+            # Check if in quiz mode
+            if display_data.get("quiz_mode", False):
+                # QUIZ MODE UI
+                st.markdown("---")
+                
+                quiz_complete = display_data.get("quiz_complete", False)
+                quiz_questions = display_data.get("quiz_questions", [])
+                current_quiz_index = display_data.get("current_quiz_index", 0)
+                quiz_evaluation = display_data.get("quiz_evaluation", {})
+                quiz_attempts = display_data.get("quiz_attempts", {})
+                
+                if quiz_complete:
+                    # Show quiz completion
+                    render_quiz_complete(
+                        display_data["quiz_scores"],
+                        len(quiz_questions)
+                    )
+                    return
+                
+                # Get current question
+                if current_quiz_index < len(quiz_questions):
+                    current_question = quiz_questions[current_quiz_index]
+                    question_id = current_question['id']
+                    attempt_number = quiz_attempts.get(question_id, 0) + 1
+                    
+                    # Show current question
+                    render_quiz_question(current_question, attempt_number)
+                    
+                    # Show evaluation if there was a recent submission
+                    if quiz_evaluation and quiz_evaluation.get('question_id') == question_id:
+                        render_quiz_evaluation(quiz_evaluation)
+                    
+                    # Parameter input controls for quiz mode
+                    st.markdown("### 🎛️ Set Your Parameters")
+                    st.info("💡 Adjust the parameters below and click SUBMIT to test your answer!")
+                    
+                    # Initialize quiz params in session state if not present
+                    if "quiz_params" not in st.session_state:
+                        st.session_state.quiz_params = display_data["current_params"].copy()
+                    
+                    # Create sliders for each parameter
+                    quiz_params = {}
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        quiz_params["length"] = st.slider(
+                            "🔗 Pendulum Length",
+                            min_value=1,
+                            max_value=10,
+                            value=st.session_state.quiz_params.get("length", 5),
+                            step=1,
+                            help="Longer pendulum = slower swings"
+                        )
+                    
+                    with col2:
+                        quiz_params["number_of_oscillations"] = st.slider(
+                            "🔄 Number of Oscillations",
+                            min_value=5,
+                            max_value=50,
+                            value=st.session_state.quiz_params.get("number_of_oscillations", 10),
+                            step=5,
+                            help="How many swings to observe"
+                        )
+                    
+                    # Update session state with new values
+                    st.session_state.quiz_params = quiz_params
+                    
+                    # Show simulation preview with current slider values
+                    st.markdown("### 🔬 Simulation Preview")
+                    render_simulation_single(
+                        sim_key=st.session_state.current_simulation,
+                        params=quiz_params,
+                        title=""
+                    )
+                    
+                    # Quiz submission button
+                    st.markdown("---")
+                    if render_quiz_submit_button(quiz_params):
+                        # Submit quiz answer with the slider values
+                        with st.spinner("Evaluating your answer... 🤔"):
+                            try:
+                                state = submit_quiz_answer(
+                                    st.session_state.thread_id,
+                                    question_id,
+                                    quiz_params
+                                )
+                                st.session_state.backend_state = state
+                                # Update quiz params for next attempt
+                                st.session_state.quiz_params = quiz_params
+                                
+                                # Sync new conversation messages to chat UI
+                                sync_conversation_to_chat(state)
+                                
+                                st.rerun()
+                            except Exception as e:
+                                st.error(f"Failed to submit: {e}")
+                                import traceback
+                                st.error(traceback.format_exc())
+                
+                # Don't show regular chat input in quiz mode
+                return
+            
+            # Regular teaching mode - check if complete
             if display_data["session_complete"]:
                 st.success("🎉 **Congratulations!** You've completed the lesson!")
                 

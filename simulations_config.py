@@ -239,3 +239,177 @@ def get_initial_params(simulation_id: str) -> dict:
     """Get initial parameters for a specific simulation."""
     sim = get_simulation(simulation_id)
     return sim["initial_params"] if sim else {}
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# QUIZ QUESTIONS CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════
+
+QUIZ_QUESTIONS = {
+    "simple_pendulum": [
+        {
+            "id": "pendulum_q1",
+            "challenge": "Can you make the pendulum swing slower? Set the pendulum length to 8 units or more to increase the time period.",
+            "target_parameters": ["length"],
+            "success_rule": {
+                "conditions": [
+                    {"parameter": "length", "operator": ">=", "value": 8}
+                ],
+                "scoring": {
+                    "perfect": 1.0,    # length >= 8
+                    "partial": 0.6,    # length >= 6
+                    "wrong": 0.3       # length < 6
+                },
+                "thresholds": {
+                    "perfect": {"length": 8},
+                    "partial": {"length": 6}
+                }
+            },
+            "hints": {
+                "attempt_1": "Think about what makes a pendulum swing slower. Which parameter affects the time period?",
+                "attempt_2": "Remember from our lesson: longer pendulums take more time per swing. Try increasing the length parameter.",
+                "attempt_3": "Set the length to 8 or higher to make the pendulum swing slowly."
+            },
+            "concept_reminder": "The time period of a pendulum depends on its length. A longer pendulum swings slower (longer time period), while a shorter pendulum swings faster (shorter time period)."
+        },
+        {
+            "id": "pendulum_q2",
+            "challenge": "Set the pendulum to complete exactly 5 oscillations. Can you make it swing as fast as possible while counting 5 swings?",
+            "target_parameters": ["number_of_oscillations", "length"],
+            "success_rule": {
+                "conditions": [
+                    {"parameter": "number_of_oscillations", "operator": "==", "value": 5},
+                    {"parameter": "length", "operator": "<=", "value": 3}
+                ],
+                "scoring": {
+                    "perfect": 1.0,    # oscillations == 5 AND length <= 3
+                    "partial": 0.6,    # oscillations == 5 only
+                    "wrong": 0.3       # neither condition met
+                },
+                "thresholds": {
+                    "perfect": {"number_of_oscillations": 5, "length": 3},
+                    "partial": {"number_of_oscillations": 5}
+                }
+            },
+            "hints": {
+                "attempt_1": "You need to set the number of oscillations to exactly 5, and make the pendulum swing quickly.",
+                "attempt_2": "Remember: shorter pendulums swing faster! Try reducing the length while keeping oscillations at 5.",
+                "attempt_3": "Set number_of_oscillations to 5 and length to 3 or less for the fastest swings."
+            },
+            "concept_reminder": "The number of oscillations determines how many swings we count, while length affects how fast each swing happens. Shorter pendulums complete multiple swings in less total time."
+        }
+    ],
+    
+    "earth_rotation_revolution": [
+        {
+            "id": "earth_q1",
+            "challenge": "Can you make it nighttime for the observer on Earth? Adjust the rotation to show darkness.",
+            "target_parameters": ["rotation_angle"],
+            "success_rule": {
+                "conditions": [
+                    {"parameter": "rotation_angle", "operator": ">=", "value": 90},
+                    {"parameter": "rotation_angle", "operator": "<=", "value": 270}
+                ],
+                "scoring": {
+                    "perfect": 1.0,    # 90° <= rotation <= 270° (night side)
+                    "partial": 0.6,    # close to night (60-90° or 270-300°)
+                    "wrong": 0.3       # day side
+                },
+                "thresholds": {
+                    "perfect": {"rotation_angle_min": 90, "rotation_angle_max": 270},
+                    "partial": {"rotation_angle_min": 60, "rotation_angle_max": 300}
+                }
+            },
+            "hints": {
+                "attempt_1": "Think about when your side of Earth faces away from the Sun. What angle makes it night?",
+                "attempt_2": "Earth's rotation causes day and night. Try rotating so the observer faces away from the Sun (between 90° and 270°).",
+                "attempt_3": "Set rotation angle between 90° and 270° to place the observer on the night side."
+            },
+            "concept_reminder": "Earth's rotation on its axis causes day and night. When your location faces the Sun, it's day. When facing away from the Sun (opposite side), it's night."
+        },
+        {
+            "id": "earth_q2",
+            "challenge": "Position Earth in winter (for the Northern Hemisphere). Show Earth at the correct position in its orbit.",
+            "target_parameters": ["revolution_angle"],
+            "success_rule": {
+                "conditions": [
+                    {"parameter": "revolution_angle", "operator": ">=", "value": 250},
+                    {"parameter": "revolution_angle", "operator": "<=", "value": 290}
+                ],
+                "scoring": {
+                    "perfect": 1.0,    # ~270° (winter solstice)
+                    "partial": 0.6,    # close to winter position
+                    "wrong": 0.3       # wrong season
+                },
+                "thresholds": {
+                    "perfect": {"revolution_angle_min": 250, "revolution_angle_max": 290},
+                    "partial": {"revolution_angle_min": 230, "revolution_angle_max": 310}
+                }
+            },
+            "hints": {
+                "attempt_1": "In winter, the Northern Hemisphere tilts away from the Sun. Where should Earth be in its orbit?",
+                "attempt_2": "Remember: Earth's tilt combined with its position in orbit creates seasons. Try around 270° for winter.",
+                "attempt_3": "Set revolution angle between 250° and 290° to show Earth in winter position."
+            },
+            "concept_reminder": "Earth's revolution around the Sun, combined with its tilted axis, causes seasons. In winter, your hemisphere tilts away from the Sun, receiving less direct sunlight."
+        }
+    ],
+    
+    "light_shadows": [
+        {
+            "id": "light_q1",
+            "challenge": "Create a partial shadow (penumbra). Adjust the light size to show both dark and lighter shadow regions.",
+            "target_parameters": ["light_size"],
+            "success_rule": {
+                "conditions": [
+                    {"parameter": "light_size", "operator": ">=", "value": 3}
+                ],
+                "scoring": {
+                    "perfect": 1.0,    # light_size >= 3 (clear penumbra)
+                    "partial": 0.6,    # light_size >= 2 (some penumbra)
+                    "wrong": 0.3       # light_size < 2 (sharp shadow)
+                },
+                "thresholds": {
+                    "perfect": {"light_size": 3},
+                    "partial": {"light_size": 2}
+                }
+            },
+            "hints": {
+                "attempt_1": "A partial shadow forms when the light source is large. How big should the light be?",
+                "attempt_2": "Larger light sources create softer shadows with partial shadow regions (penumbra). Try increasing light size.",
+                "attempt_3": "Set light size to 3 or more to create a clear partial shadow (penumbra) around the dark shadow (umbra)."
+            },
+            "concept_reminder": "The size of the light source affects shadow sharpness. Large light sources create soft shadows with partial shadow regions (penumbra), while small light sources create sharp shadows."
+        },
+        {
+            "id": "light_q2",
+            "challenge": "Make the shadow as long as possible. Position the light to create the longest shadow.",
+            "target_parameters": ["light_distance"],
+            "success_rule": {
+                "conditions": [
+                    {"parameter": "light_distance", "operator": "<=", "value": 3}
+                ],
+                "scoring": {
+                    "perfect": 1.0,    # light_distance <= 3 (very long shadow)
+                    "partial": 0.6,    # light_distance <= 5 (longer shadow)
+                    "wrong": 0.3       # light_distance > 5 (short shadow)
+                },
+                "thresholds": {
+                    "perfect": {"light_distance": 3},
+                    "partial": {"light_distance": 5}
+                }
+            },
+            "hints": {
+                "attempt_1": "Shadow length depends on how close or far the light is. What distance creates the longest shadow?",
+                "attempt_2": "When light is closer to the object, shadows appear longer. Try moving the light closer.",
+                "attempt_3": "Set light distance to 3 or less to create the longest possible shadow."
+            },
+            "concept_reminder": "Shadow length depends on the distance between the light source and the object. Closer light sources create longer shadows, while farther light sources create shorter shadows."
+        }
+    ]
+}
+
+
+def get_quiz_questions(simulation_id: str) -> list:
+    """Get quiz questions for a specific simulation."""
+    return QUIZ_QUESTIONS.get(simulation_id, [])

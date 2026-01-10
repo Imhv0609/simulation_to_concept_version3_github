@@ -17,14 +17,17 @@ from api_models import (
     StudentResponseRequest,
     SessionResponse,
     HealthCheckResponse,
-    ErrorResponse
+    ErrorResponse,
+    QuizSubmissionRequest,
+    QuizEvaluationResponse
 )
 from api_integration import (
     create_teaching_session,
     process_student_input,
     get_session_info,
     get_available_simulations,
-    validate_simulation_id
+    validate_simulation_id,
+    submit_quiz_answer
 )
 
 
@@ -303,6 +306,97 @@ async def get_session(session_id: str):
 # ═══════════════════════════════════════════════════════════════════════
 # ADDITIONAL UTILITY ENDPOINTS
 # ═══════════════════════════════════════════════════════════════════════
+
+@app.post(
+    "/api/session/{session_id}/submit-quiz",
+    response_model=QuizEvaluationResponse,
+    tags=["Quiz Management"],
+    summary="Submit Quiz Answer"
+)
+async def submit_quiz(session_id: str, request: QuizSubmissionRequest):
+    """
+    Submit quiz answer with parameters from simulation.
+    
+    ## Process
+    1. Validates session exists and is in quiz mode
+    2. Evaluates submitted parameters against success rules (fast, rule-based)
+    3. Generates adaptive feedback using LLM based on score and attempt
+    4. Determines if retry is allowed (max 3 attempts)
+    5. Returns evaluation with feedback and quiz progress
+    
+    ## Request Body
+    ```json
+    {
+      "question_id": "pendulum_q1",
+      "submitted_parameters": {
+        "length": 5.0,
+        "mass": 1.0,
+        "number_of_oscillations": 10
+      },
+      "attempt_number": 1
+    }
+    ```
+    
+    ## Response
+    Returns evaluation including:
+    - Score (1.0=perfect, 0.5=partial, 0.0=wrong)
+    - Status (RIGHT, PARTIALLY_RIGHT, WRONG)
+    - Adaptive teacher feedback
+    - Whether retry is allowed
+    - Quiz progress statistics
+    - Next question details (if applicable)
+    
+    ## Scoring
+    - **Perfect (1.0)**: All parameters meet perfect criteria
+    - **Partial (0.5)**: Parameters meet partial criteria
+    - **Wrong (0.0)**: Parameters don't meet minimum criteria
+    
+    ## Retry Logic
+    - Maximum 3 attempts per question
+    - Progressive hints provided with each attempt
+    - After 3 attempts or correct answer, moves to next question
+    """
+    try:
+        # Submit quiz answer and get evaluation
+        response = submit_quiz_answer(
+            session_id=session_id,
+            question_id=request.question_id,
+            submitted_parameters=request.submitted_parameters
+        )
+        
+        return response
+        
+    except KeyError as e:
+        # Session not found
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "error": "Session Not Found",
+                "message": str(e)
+            }
+        )
+    except ValueError as e:
+        # Invalid state (e.g., not in quiz mode)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error": "Invalid Request",
+                "message": str(e)
+            }
+        )
+    except Exception as e:
+        # Unexpected error
+        print(f"\n❌ Error submitting quiz:")
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "error": "Internal Server Error",
+                "message": "Failed to evaluate quiz submission",
+                "detail": str(e)
+            }
+        )
+
 
 @app.get(
     "/api/simulations",

@@ -105,6 +105,20 @@ class TeachingState(TypedDict):
     requested_param: str                # Which param they want to change
     requested_value: Any                # What value they want
     is_factually_wrong: bool            # True if student stated something incorrect
+    
+    # ═══════════════════════════════════════════════════════════════════════
+    # QUIZ MODE (activated after all concepts taught)
+    # ═══════════════════════════════════════════════════════════════════════
+    quiz_mode: bool                     # True when in quiz mode, False during teaching
+    quiz_questions: List[Dict[str, Any]]  # Loaded quiz questions for this simulation
+    current_quiz_index: int             # Which quiz question (0, 1, 2...)
+    quiz_attempts: Dict[str, int]       # {"q1": 2, "q2": 1} - attempts per question
+    quiz_scores: Dict[str, float]       # {"q1": 1.0, "q2": 0.6} - score per question
+    quiz_complete: bool                 # All quiz questions answered
+    
+    # Quiz submission (from API)
+    submitted_parameters: Dict[str, Any]  # Parameters submitted by student via Android
+    quiz_evaluation: Dict[str, Any]     # Last evaluation result (score, status, feedback)
 
 
 def create_initial_state(topic_description: str, initial_params: Dict[str, float]) -> TeachingState:
@@ -158,7 +172,17 @@ def create_initial_state(topic_description: str, initial_params: Dict[str, float
         "student_requested_param": False,
         "requested_param": "",
         "requested_value": None,
-        "is_factually_wrong": False
+        "is_factually_wrong": False,
+        
+        # Quiz mode (initialized as False, activated after concepts complete)
+        "quiz_mode": False,
+        "quiz_questions": [],
+        "current_quiz_index": 0,
+        "quiz_attempts": {},
+        "quiz_scores": {},
+        "quiz_complete": False,
+        "submitted_parameters": {},
+        "quiz_evaluation": {}
     }
 
 

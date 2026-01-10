@@ -59,6 +59,12 @@ from nodes import (
     trajectory_analyzer_node,
     strategy_selector_node
 )
+from nodes.quiz_evaluator import (
+    quiz_initializer_node,
+    quiz_teacher_node,
+    quiz_evaluator_node,
+    quiz_router
+)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -125,10 +131,23 @@ def route_after_strategy(state: TeachingState) -> str:
     """
     Route after strategy selector.
     
-    If session is complete → END
-    Otherwise → back to teacher
+    Priority order:
+    1. If all concepts taught and NOT in quiz mode → quiz_initializer
+    2. If session complete → END
+    3. Otherwise → back to teacher
     """
     session_complete = state.get("session_complete", False)
+    quiz_mode = state.get("quiz_mode", False)
+    
+    # Check if all concepts have been taught
+    concepts = state.get("concepts", [])
+    current_concept_index = state.get("current_concept_index", 0)
+    all_concepts_taught = current_concept_index >= len(concepts)
+    
+    # If all concepts taught and not yet in quiz mode, start quiz
+    if all_concepts_taught and not quiz_mode:
+        print("\n🔀 [ROUTING] All concepts taught → quiz_initializer")
+        return "quiz_initializer"
     
     if session_complete:
         print("\n🔀 [ROUTING] Session complete → END")
@@ -147,29 +166,50 @@ def create_teaching_graph() -> StateGraph:
     
     workflow = StateGraph(TeachingState)
     
-    # Add all nodes
+    # Add teaching nodes
     workflow.add_node("content_loader", content_loader_node)
     workflow.add_node("teacher", teacher_node)
     workflow.add_node("evaluator", understanding_evaluator_node)
     workflow.add_node("trajectory", trajectory_analyzer_node)
     workflow.add_node("strategy", strategy_selector_node)
     
+    # Add quiz nodes
+    workflow.add_node("quiz_initializer", quiz_initializer_node)
+    workflow.add_node("quiz_teacher", quiz_teacher_node)
+    workflow.add_node("quiz_evaluator", quiz_evaluator_node)
+    
     # Set entry point
     workflow.set_entry_point("content_loader")
     
-    # Define edges
+    # Define teaching flow edges
     workflow.add_edge("content_loader", "teacher")
     # Teacher → [INTERRUPT] → Evaluator (interrupt handled in compile)
     workflow.add_edge("teacher", "evaluator")
     workflow.add_edge("evaluator", "trajectory")
     workflow.add_edge("trajectory", "strategy")
     
-    # Conditional routing after strategy
+    # Conditional routing after strategy (teaching → quiz or continue teaching)
     workflow.add_conditional_edges(
         "strategy",
         route_after_strategy,
         {
             "teacher": "teacher",
+            "quiz_initializer": "quiz_initializer",
+            END: END
+        }
+    )
+    
+    # Define quiz flow edges
+    workflow.add_edge("quiz_initializer", "quiz_teacher")
+    # Quiz Teacher → [INTERRUPT] → Quiz Evaluator (interrupt handled in compile)
+    workflow.add_edge("quiz_teacher", "quiz_evaluator")
+    
+    # Conditional routing after quiz evaluation (retry/next/end)
+    workflow.add_conditional_edges(
+        "quiz_evaluator",
+        quiz_router,
+        {
+            "quiz_teacher": "quiz_teacher",
             END: END
         }
     )
@@ -193,14 +233,15 @@ def compile_graph(force_recompile: bool = False):
         workflow = create_teaching_graph()
         _compiled_graph = workflow.compile(
             checkpointer=_checkpointer,
-            interrupt_before=["evaluator"]  # Pause before evaluation to get student input
+            interrupt_before=["evaluator", "quiz_evaluator"]  # Pause for student input
         )
         
         checkpointer_type = "PostgresSaver" if isinstance(_checkpointer, PostgresSaver) else "MemorySaver"
         print("✅ Graph compiled with:")
         print(f"   • {checkpointer_type} checkpointer")
-        print("   • Interrupt before evaluator (for student input)")
-        print("   • Flow: content_loader → teacher → [WAIT] → evaluator → trajectory → strategy → [loop/END]")
+        print("   • Interrupt before: evaluator, quiz_evaluator")
+        print("   • Teaching Flow: content_loader → teacher → [WAIT] → evaluator → trajectory → strategy → [loop]")
+        print("   • Quiz Flow: strategy → quiz_initializer → quiz_teacher → [WAIT] → quiz_evaluator → [retry/next/END]")
     
     return _compiled_graph
 
@@ -268,8 +309,36 @@ def continue_session(student_response: str, thread_id: str) -> Dict[str, Any]:
     print("="*60)
     print(f"   Response: \"{student_response[:100]}...\"" if len(student_response) > 100 else f"   Response: \"{student_response}\"")
     
-    # Update state with student response
-    graph.update_state(config, {"student_response": student_response})
+    # Check current state before updating
+    current_state = graph.get_state(config)
+    print(f"   DEBUG: Before update - next nodes = {current_state.next}")
+    
+    # Update state with student response - preserve the current checkpoint position
+    if current_state.next:
+        # Use as_node to preserve the checkpoint position
+        last_node = current_state.next[0] if current_state.next else None
+        if last_node:
+            # Get the node that ran before the interrupt
+            # If next is quiz_evaluator, we came from quiz_teacher
+            # If next is evaluator, we came from teacher
+            as_node_map = {
+                "quiz_evaluator": "quiz_teacher",
+                "evaluator": "teacher"
+            }
+            as_node = as_node_map.get(last_node, None)
+            if as_node:
+                print(f"   DEBUG: Updating state as_node={as_node}")
+                graph.update_state(config, {"student_response": student_response}, as_node=as_node)
+            else:
+                graph.update_state(config, {"student_response": student_response})
+        else:
+            graph.update_state(config, {"student_response": student_response})
+    else:
+        graph.update_state(config, {"student_response": student_response})
+    
+    # Check state after updating
+    updated_state = graph.get_state(config)
+    print(f"   DEBUG: After update - next nodes = {updated_state.next}")
     
     # Continue execution
     for event in graph.stream(None, config=config):

@@ -327,3 +327,116 @@ def get_available_simulations() -> list:
 def validate_simulation_id(simulation_id: str) -> bool:
     """Check if simulation ID is valid"""
     return get_simulation(simulation_id) is not None
+
+
+def submit_quiz_answer(session_id: str, question_id: str, submitted_parameters: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Submit quiz answer and get evaluation with feedback.
+    
+    Directly runs quiz_evaluator_node without going through the full graph,
+    which avoids checkpoint issues when in quiz mode.
+    
+    Args:
+        session_id: The session thread ID
+        question_id: ID of question being answered
+        submitted_parameters: Parameters from simulation
+        
+    Returns:
+        Quiz evaluation response dictionary
+    """
+    from graph import compile_graph, get_session_state
+    from nodes.quiz_evaluator import quiz_evaluator_node, quiz_teacher_node, quiz_router
+    from quiz_rules import calculate_quiz_progress
+    
+    print(f"\n{'='*60}")
+    print(f"🎯 Processing quiz submission")
+    print(f"   Session: {session_id}")
+    print(f"   Question: {question_id}")
+    print(f"   Parameters: {submitted_parameters}")
+    print(f"{'='*60}")
+    
+    # Get current state to verify quiz mode
+    graph = compile_graph()
+    config = {"configurable": {"thread_id": session_id}}
+    
+    current_snapshot = graph.get_state(config)
+    state = dict(current_snapshot.values) if current_snapshot.values else {}
+    
+    if not state:
+        raise KeyError(f"Session {session_id} not found")
+    
+    if not state.get('quiz_mode', False):
+        raise ValueError("Session is not in quiz mode")
+    
+    print("   ✅ Quiz mode active - running direct evaluation")
+    
+    # Update state with submitted parameters
+    state["submitted_parameters"] = submitted_parameters
+    
+    # Run quiz_evaluator_node directly
+    print("\n" + "="*60)
+    print("🔍 QUIZ EVALUATOR - Evaluating Submission")
+    print("="*60)
+    
+    eval_updates = quiz_evaluator_node(state)
+    
+    # Merge updates into state
+    for key, value in eval_updates.items():
+        state[key] = value
+    
+    print(f"   ✓ Completed: quiz_evaluator")
+    
+    # Check if we need to present next question or end
+    route_decision = quiz_router(state)
+    print(f"   Route decision: {route_decision}")
+    
+    if route_decision == "quiz_teacher":
+        # Run quiz_teacher_node to present next question or retry
+        teacher_updates = quiz_teacher_node(state)
+        for key, value in teacher_updates.items():
+            state[key] = value
+        print(f"   ✓ Completed: quiz_teacher")
+    else:
+        print(f"   ✓ Quiz complete!")
+    
+    # Save the updated state back to the graph
+    graph.update_state(config, state, as_node="quiz_teacher")
+    
+    # Extract evaluation result
+    evaluation = state.get('quiz_evaluation', {})
+    quiz_scores = state.get('quiz_scores', {})
+    quiz_questions = state.get('quiz_questions', [])
+    current_index = state.get('current_quiz_index', 0)
+    quiz_complete = state.get('quiz_complete', False)
+    
+    print(f"✅ Evaluation complete")
+    print(f"   Score: {evaluation.get('score', 0)} | Status: {evaluation.get('status', 'UNKNOWN')}")
+    print(f"   Quiz Complete: {quiz_complete}")
+    
+    # Calculate progress
+    progress = calculate_quiz_progress(quiz_scores, len(quiz_questions))
+    
+    # Format next question if available and quiz not complete
+    next_question = None
+    if not quiz_complete and current_index < len(quiz_questions):
+        next_q = quiz_questions[current_index]
+        next_question = {
+            "id": next_q['id'],
+            "challenge": next_q['challenge']
+        }
+    
+    # Build response
+    response = {
+        "session_id": session_id,
+        "question_id": evaluation.get('question_id', question_id),
+        "score": evaluation.get('score', 0.0),
+        "status": evaluation.get('status', 'WRONG'),
+        "feedback": evaluation.get('feedback', 'Evaluation failed'),
+        "attempt": evaluation.get('attempt', 1),
+        "allow_retry": evaluation.get('allow_retry', False),
+        "quiz_complete": quiz_complete,
+        "quiz_progress": progress,
+        "next_question": next_question
+    }
+    
+    return response

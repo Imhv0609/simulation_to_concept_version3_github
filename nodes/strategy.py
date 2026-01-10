@@ -195,8 +195,9 @@ def strategy_selector_node(state: Dict[str, Any]) -> Dict[str, Any]:
         updates["exchange_count"] = 0
         
         if new_idx >= len(concepts):
-            updates["session_complete"] = True
-            print("   🎉 All concepts complete! Session ending.")
+            # Don't set session_complete here - let quiz mode handle it
+            # Session only completes after quiz is done
+            print("   ✅ All concepts complete! Ready for quiz mode.")
         else:
             print(f"   ➡️ Advancing to concept {new_idx + 1}: {concepts[new_idx]['title']}")
     

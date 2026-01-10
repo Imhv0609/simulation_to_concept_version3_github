@@ -225,7 +225,16 @@ def extract_display_data(state: Dict[str, Any]) -> Dict[str, Any]:
         "teacher_mode": state.get("teacher_mode", "encouraging"),
         
         # Conversation history
-        "conversation_history": state.get("conversation_history", [])
+        "conversation_history": state.get("conversation_history", []),
+        
+        # Quiz state
+        "quiz_mode": state.get("quiz_mode", False),
+        "quiz_questions": state.get("quiz_questions", []),
+        "current_quiz_index": state.get("current_quiz_index", 0),
+        "quiz_attempts": state.get("quiz_attempts", {}),
+        "quiz_scores": state.get("quiz_scores", {}),
+        "quiz_complete": state.get("quiz_complete", False),
+        "quiz_evaluation": state.get("quiz_evaluation", {})
     }
 
 
@@ -261,3 +270,84 @@ def build_sim_url(params: Dict[str, Any], autostart: bool = True) -> str:
     if autostart:
         url += "&autoStart=true"
     return url
+
+
+def submit_quiz_answer(thread_id: str, question_id: str, submitted_params: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Submit quiz answer and get evaluation.
+    
+    Directly runs quiz_evaluator_node without going through the full graph,
+    which avoids checkpoint issues when testing quiz mode.
+    
+    Args:
+        thread_id: The session thread ID
+        question_id: ID of the question being answered
+        submitted_params: Parameters from the simulation
+        
+    Returns:
+        Updated state dict after evaluation
+    """
+    if not BACKEND_AVAILABLE:
+        raise RuntimeError("Backend not available")
+    
+    from graph import compile_graph
+    from nodes.quiz_evaluator import quiz_evaluator_node, quiz_teacher_node, quiz_router
+    
+    print("\n" + "="*60)
+    print("📥 QUIZ SUBMISSION - Direct Evaluation")
+    print("="*60)
+    print(f"   Thread: {thread_id}")
+    print(f"   Question: {question_id}")
+    print(f"   Params: {submitted_params}")
+    
+    # Get graph and config
+    graph = compile_graph()
+    config = {"configurable": {"thread_id": thread_id}}
+    
+    # Get current state
+    current_snapshot = graph.get_state(config)
+    current_state = dict(current_snapshot.values) if current_snapshot.values else {}
+    
+    # Check if we're in quiz mode
+    if not current_state.get("quiz_mode", False):
+        print("   ⚠️ Not in quiz mode - using regular continue_session")
+        from graph import continue_session
+        graph.update_state(config, {"submitted_parameters": submitted_params})
+        return continue_session("", thread_id)
+    
+    print("   ✅ Quiz mode active - running direct evaluation")
+    
+    # Update state with submitted parameters
+    current_state["submitted_parameters"] = submitted_params
+    
+    # Run quiz_evaluator_node directly
+    print("\n" + "="*60)
+    print("🔍 QUIZ EVALUATOR - Evaluating Submission")
+    print("="*60)
+    
+    eval_updates = quiz_evaluator_node(current_state)
+    
+    # Merge updates into state
+    for key, value in eval_updates.items():
+        current_state[key] = value
+    
+    print(f"   ✓ Completed: quiz_evaluator")
+    
+    # Check if we need to present next question or end
+    route_decision = quiz_router(current_state)
+    print(f"   Route decision: {route_decision}")
+    
+    if route_decision == "quiz_teacher":
+        # Run quiz_teacher_node to present next question or retry
+        teacher_updates = quiz_teacher_node(current_state)
+        for key, value in teacher_updates.items():
+            current_state[key] = value
+        print(f"   ✓ Completed: quiz_teacher")
+    else:
+        print(f"   ✓ Quiz complete!")
+    
+    # Save the updated state back to the graph
+    graph.update_state(config, current_state, as_node="quiz_teacher")
+    
+    # Return the updated state
+    return current_state

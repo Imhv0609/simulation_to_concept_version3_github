@@ -207,3 +207,117 @@ class HealthCheckResponse(BaseModel):
                 ]
             }
         }
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# QUIZ MODELS
+# ═══════════════════════════════════════════════════════════════════════
+
+class QuizSubmissionRequest(BaseModel):
+    """Request to submit quiz answer with parameters"""
+    question_id: str = Field(
+        ...,
+        description="ID of the quiz question being answered"
+    )
+    submitted_parameters: Dict[str, Any] = Field(
+        ...,
+        description="Parameters read from simulation (e.g., {'length': 5.0, 'mass': 1.0})"
+    )
+    attempt_number: int = Field(
+        ...,
+        description="Current attempt number (1-3)",
+        ge=1,
+        le=3
+    )
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "question_id": "pendulum_q1",
+                "submitted_parameters": {
+                    "length": 5.0,
+                    "mass": 1.0,
+                    "number_of_oscillations": 10
+                },
+                "attempt_number": 1
+            }
+        }
+
+
+class QuizProgress(BaseModel):
+    """Quiz progress information"""
+    current_question: int
+    total_questions: int
+    questions_completed: int
+    questions_remaining: int
+    average_score: float
+    perfect_count: int
+    partial_count: int
+    wrong_count: int
+
+
+class QuizEvaluationResponse(BaseModel):
+    """Response after quiz submission evaluation"""
+    session_id: str
+    question_id: str
+    score: float = Field(
+        ...,
+        description="Score: 1.0 (perfect), 0.5 (partial), 0.0 (wrong)",
+        ge=0.0,
+        le=1.0
+    )
+    status: str = Field(
+        ...,
+        description="Status: RIGHT, PARTIALLY_RIGHT, or WRONG"
+    )
+    feedback: str = Field(
+        ...,
+        description="Teacher's adaptive feedback based on score and attempt"
+    )
+    attempt: int = Field(
+        ...,
+        description="Current attempt number",
+        ge=1,
+        le=3
+    )
+    allow_retry: bool = Field(
+        ...,
+        description="Whether student can retry this question"
+    )
+    quiz_complete: bool = Field(
+        ...,
+        description="Whether all quiz questions are completed"
+    )
+    quiz_progress: QuizProgress
+    next_question: Optional[Dict[str, Any]] = Field(
+        None,
+        description="Next question details if moving to next question"
+    )
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "session_id": "api_session_abc123",
+                "question_id": "pendulum_q1",
+                "score": 1.0,
+                "status": "RIGHT",
+                "feedback": "Excellent work! Your parameters achieve the goal perfectly. The longer length increases the time period just as we learned.",
+                "attempt": 1,
+                "allow_retry": False,
+                "quiz_complete": False,
+                "quiz_progress": {
+                    "current_question": 1,
+                    "total_questions": 2,
+                    "questions_completed": 1,
+                    "questions_remaining": 1,
+                    "average_score": 1.0,
+                    "perfect_count": 1,
+                    "partial_count": 0,
+                    "wrong_count": 0
+                },
+                "next_question": {
+                    "id": "pendulum_q2",
+                    "challenge": "Next challenge here..."
+                }
+            }
+        }
