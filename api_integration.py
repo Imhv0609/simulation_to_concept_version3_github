@@ -194,18 +194,24 @@ def create_teaching_session(simulation_id: str, student_id: str = None) -> Tuple
             f"Available: {', '.join(available)}"
         )
     
-    # Set simulation in environment
+    # Set simulation in environment (for any modules that still use it)
     set_simulation_environment(simulation_id)
     
     # Import directly from backend modules (bypass backend_integration.py)
     import uuid
-    from config import validate_config, TOPIC_DESCRIPTION, INITIAL_PARAMS
+    from config import validate_config
     from state import create_initial_state
     from graph import start_session
+    
+    # Get simulation config dynamically (NOT from cached module constants!)
+    sim_config = get_simulation(simulation_id)
+    topic_description = sim_config['description']
+    initial_params = sim_config['initial_params']
     
     print(f"\n{'='*60}")
     print(f"🚀 Creating new teaching session")
     print(f"   Simulation: {simulation_id}")
+    print(f"   Topic: {sim_config['title']}")
     if student_id:
         print(f"   Student: {student_id}")
     print(f"{'='*60}")
@@ -216,10 +222,11 @@ def create_teaching_session(simulation_id: str, student_id: str = None) -> Tuple
     # Create unique session ID
     thread_id = f"api_session_{uuid.uuid4().hex[:8]}"
     
-    # Create initial state
+    # Create initial state with simulation_id for downstream nodes
     initial_state = create_initial_state(
-        topic_description=TOPIC_DESCRIPTION,
-        initial_params=INITIAL_PARAMS.copy()
+        topic_description=topic_description,
+        initial_params=initial_params.copy(),
+        simulation_id=simulation_id  # Pass simulation_id for content_loader
     )
     
     # Start the session - runs until first interrupt
