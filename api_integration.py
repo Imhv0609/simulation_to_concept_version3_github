@@ -67,8 +67,8 @@ def format_api_response(thread_id: str, state: Dict[str, Any], simulation_id: st
     # Extract current parameters
     current_params = state.get('current_params', {})
     
-    # Build current simulation URL
-    sim_url = build_simulation_url(current_params, autostart=True)
+    # Build current simulation URL with correct simulation_id
+    sim_url = build_simulation_url(current_params, autostart=True, simulation_id=simulation_id)
     
     # Check for parameter changes
     param_change = None
@@ -76,10 +76,10 @@ def format_api_response(thread_id: str, state: Dict[str, Any], simulation_id: st
     if param_history:
         last_change = param_history[-1]
         
-        # Build before and after URLs
+        # Build before and after URLs with correct simulation_id
         before_params = current_params.copy()
         before_params[last_change['parameter']] = last_change['old_value']
-        before_url = build_simulation_url(before_params, autostart=True)
+        before_url = build_simulation_url(before_params, autostart=True, simulation_id=simulation_id)
         after_url = sim_url
         
         param_change = {
