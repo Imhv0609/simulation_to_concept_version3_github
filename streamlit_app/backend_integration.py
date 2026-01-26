@@ -16,13 +16,11 @@ sys.path.insert(0, str(parent_dir))
 
 # Import backend modules
 try:
+    # Only import what we need - NOT cached constants!
+    # Dynamic simulation loading means we DON'T import TOPIC_DESCRIPTION, INITIAL_PARAMS, etc.
     from config import (
         validate_config,
-        TOPIC_DESCRIPTION,
-        INITIAL_PARAMS,
         MAX_EXCHANGES,
-        CANNOT_DEMONSTRATE,
-        PRE_DEFINED_CONCEPTS,
         build_simulation_url
     )
     from state import create_initial_state, TeachingState
@@ -45,9 +43,12 @@ def is_backend_available() -> bool:
     return BACKEND_AVAILABLE
 
 
-def create_new_session() -> Tuple[str, Dict[str, Any]]:
+def create_new_session(simulation_id: str = "simple_pendulum") -> Tuple[str, Dict[str, Any]]:
     """
-    Create a new teaching session.
+    Create a new teaching session for a specific simulation.
+    
+    Args:
+        simulation_id: The ID of the simulation to create a session for
     
     Returns:
         Tuple of (thread_id, initial_state_from_backend)
@@ -55,7 +56,19 @@ def create_new_session() -> Tuple[str, Dict[str, Any]]:
     if not BACKEND_AVAILABLE:
         raise RuntimeError("Backend not available")
     
-    # Reload ALL modules to pick up environment variable changes
+    # Dynamically get simulation configuration (NOT from cached module constants!)
+    from simulations_config import get_simulation
+    sim_config = get_simulation(simulation_id)
+    
+    if not sim_config:
+        raise ValueError(f"Unknown simulation: {simulation_id}")
+    
+    # Extract simulation-specific data
+    topic_description = sim_config['description']
+    initial_params = sim_config['initial_params'].copy()
+    topic_title = sim_config['title']
+    
+    # Reload ALL modules to pick up any changes
     import importlib
     import simulations_config
     import config
@@ -74,14 +87,8 @@ def create_new_session() -> Tuple[str, Dict[str, Any]]:
     importlib.reload(state_module)
     importlib.reload(graph_module)
     
-    # Import fresh functions and values after reload
-    from config import (
-        validate_config,
-        TOPIC_DESCRIPTION,
-        INITIAL_PARAMS,
-        TOPIC_TITLE,
-        CURRENT_SIMULATION_ID
-    )
+    # Import fresh functions after reload
+    from config import validate_config
     from state import create_initial_state
     from graph import start_session, reset_graph
     
@@ -91,15 +98,16 @@ def create_new_session() -> Tuple[str, Dict[str, Any]]:
     # Validate config
     validate_config()
     
-    print(f"🔄 Creating session for: {TOPIC_TITLE} ({CURRENT_SIMULATION_ID})")
+    print(f"🔄 Creating session for: {topic_title} ({simulation_id})")
     
     # Create unique session ID
     thread_id = f"streamlit_session_{uuid.uuid4().hex[:8]}"
     
-    # Create initial state
+    # Create initial state with simulation_id for dynamic loading
     initial_state = create_initial_state(
-        topic_description=TOPIC_DESCRIPTION,
-        initial_params=INITIAL_PARAMS.copy()
+        topic_description=topic_description,
+        initial_params=initial_params,
+        simulation_id=simulation_id  # Pass simulation_id for content_loader
     )
     
     # Start the session - runs until first interrupt (waiting for student input)

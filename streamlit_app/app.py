@@ -100,8 +100,11 @@ def start_new_teaching_session():
         return False
     
     try:
-        # Create new session
-        thread_id, state = create_new_session()
+        # Get the current simulation from session state
+        simulation_id = st.session_state.get("current_simulation", "simple_pendulum")
+        
+        # Create new session with the selected simulation
+        thread_id, state = create_new_session(simulation_id)
         
         # Store in session state
         st.session_state.thread_id = thread_id
