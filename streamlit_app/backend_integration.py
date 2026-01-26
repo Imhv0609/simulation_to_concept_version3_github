@@ -178,7 +178,11 @@ def extract_display_data(state: Dict[str, Any]) -> Dict[str, Any]:
     param_history = state.get("parameter_history", [])
     has_param_change = False
     previous_params = None
-    current_params = state.get("current_params", INITIAL_PARAMS.copy())
+    
+    # Get simulation_id from state for dynamic param loading
+    simulation_id = state.get("simulation_id", "simple_pendulum")
+    default_params = get_initial_params(simulation_id)
+    current_params = state.get("current_params", default_params)
     
     # Check if there was a recent parameter change (within the last response)
     if param_history:
@@ -246,24 +250,33 @@ def extract_display_data(state: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def get_initial_params() -> Dict[str, Any]:
-    """Get the initial simulation parameters."""
+def get_initial_params(simulation_id: str = "simple_pendulum") -> Dict[str, Any]:
+    """Get the initial simulation parameters for a specific simulation."""
     if BACKEND_AVAILABLE:
-        return INITIAL_PARAMS.copy()
+        from simulations_config import get_simulation
+        sim_config = get_simulation(simulation_id)
+        if sim_config:
+            return sim_config['initial_params'].copy()
     return {"length": 5, "number_of_oscillations": 10}
 
 
-def get_concepts() -> list:
-    """Get the pre-defined concepts."""
+def get_concepts(simulation_id: str = "simple_pendulum") -> list:
+    """Get the pre-defined concepts for a specific simulation."""
     if BACKEND_AVAILABLE:
-        return PRE_DEFINED_CONCEPTS
+        from simulations_config import get_simulation
+        sim_config = get_simulation(simulation_id)
+        if sim_config:
+            return sim_config['concepts']
     return []
 
 
-def get_topic_description() -> str:
-    """Get the topic description."""
+def get_topic_description(simulation_id: str = "simple_pendulum") -> str:
+    """Get the topic description for a specific simulation."""
     if BACKEND_AVAILABLE:
-        return TOPIC_DESCRIPTION
+        from simulations_config import get_simulation
+        sim_config = get_simulation(simulation_id)
+        if sim_config:
+            return sim_config['description']
     return "Time & Pendulums"
 
 

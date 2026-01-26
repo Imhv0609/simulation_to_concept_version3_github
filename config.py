@@ -143,6 +143,11 @@ def build_simulation_url(params: dict, autostart: bool = True, base_url: str = N
         # Get the URL key from parameter info
         info = param_info.get(param_name, {})
         url_key = info.get("url_key", param_name)
+        
+        # Convert Python booleans to lowercase for JavaScript compatibility
+        if isinstance(param_value, bool):
+            param_value = "true" if param_value else "false"
+        
         query_params.append(f"{url_key}={param_value}")
     
     # Add autostart if requested

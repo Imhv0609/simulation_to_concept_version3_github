@@ -121,6 +121,53 @@ SIMULATIONS = {
         ],
         "auto_start_param": "autoStart",
         "topic": "Light & Shadows"
+    },
+    
+    "angle_sum_property": {
+        "name": "Triangle Angle Sum",
+        "description": "Explore how triangle interior angles always sum to 180°",
+        "base_url": f"{GITHUB_PAGES_BASE}/AngleSumProperty.html",
+        "parameters": [
+            {
+                "name": "vertexA_y",
+                "display_name": "Top Vertex (A) Height",
+                "default": 150,
+                "min": 50,
+                "max": 550,
+                "unit": "pixels",
+                "url_param": "vertexA_y"
+            },
+            {
+                "name": "vertexB_x",
+                "display_name": "Left Vertex (B) Position",
+                "default": 200,
+                "min": 50,
+                "max": 950,
+                "unit": "pixels",
+                "url_param": "vertexB_x"
+            },
+            {
+                "name": "vertexC_x",
+                "display_name": "Right Vertex (C) Position",
+                "default": 800,
+                "min": 50,
+                "max": 950,
+                "unit": "pixels",
+                "url_param": "vertexC_x"
+            },
+            {
+                "name": "show_proof_lines",
+                "display_name": "Show Geometric Proof",
+                "default": False,
+                "min": None,
+                "max": None,
+                "unit": "",
+                "url_param": "show_proof_lines",
+                "options": [True, False]
+            }
+        ],
+        "auto_start_param": "autoStart",
+        "topic": "Triangle Angle Sum"
     }
 }
 
@@ -184,6 +231,11 @@ def build_simulation_url(sim_key: str, params: dict, auto_start: bool = True) ->
         
         if internal_name in params:
             value = params[internal_name]
+            
+            # Convert Python booleans to lowercase for JavaScript compatibility
+            if isinstance(value, bool):
+                value = "true" if value else "false"
+            
             query_parts.append(f"{url_name}={value}")
     
     # Add auto-start if enabled

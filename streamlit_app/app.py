@@ -77,7 +77,8 @@ def initialize_session_state():
         st.session_state.current_simulation = "simple_pendulum"
     
     if "simulation_params" not in st.session_state:
-        st.session_state.simulation_params = get_initial_params()
+        sim_id = st.session_state.get("current_simulation", "simple_pendulum")
+        st.session_state.simulation_params = get_initial_params(sim_id)
     
     if "previous_params" not in st.session_state:
         st.session_state.previous_params = None
@@ -295,7 +296,7 @@ def skip_to_quiz_mode():
             "advance_concept": True,
             
             # Params
-            "current_params": get_initial_params(),
+            "current_params": get_initial_params(st.session_state.get("current_simulation", "simple_pendulum")),
             "previous_params": None,
             "param_history": [],
             "param_change_effective": False,
@@ -339,7 +340,8 @@ def skip_to_quiz_mode():
         st.session_state.thread_id = thread_id
         st.session_state.backend_state = final_state.values
         st.session_state.session_started = True
-        st.session_state.simulation_params = final_state.values.get("current_params", get_initial_params())
+        sim_id = st.session_state.get("current_simulation", "simple_pendulum")
+        st.session_state.simulation_params = final_state.values.get("current_params", get_initial_params(sim_id))
         
         # Add messages to chat from conversation history
         for msg in final_state.values.get("conversation_history", []):
@@ -478,7 +480,8 @@ def render_sidebar():
             st.session_state.previous_params = None
             st.session_state.show_simulation_comparison = False
             st.session_state.last_concept_shown = -1
-            st.session_state.simulation_params = get_initial_params()
+            sim_id = st.session_state.get("current_simulation", "simple_pendulum")
+            st.session_state.simulation_params = get_initial_params(sim_id)
             st.rerun()
         
         # Testing shortcut - Skip directly to Quiz mode
@@ -574,34 +577,56 @@ def render_demo_mode_controls():
     """Render controls for demo mode (when backend isn't available)."""
     st.warning("🎮 **Demo Mode** - Backend not connected. Limited functionality.")
     
+    # Get parameter config for current simulation
+    from streamlit_config import SIMULATIONS
+    sim_config = SIMULATIONS.get(st.session_state.current_simulation, {})
+    param_configs = sim_config.get("parameters", [])
+    sim_name = sim_config.get("name", "Simulation")
+    
     # Demo controls in sidebar
     with st.sidebar:
         st.markdown("### Demo Controls")
         
-        # Param controls
-        new_length = st.slider("Pendulum Length", 1, 10, 
-                               st.session_state.simulation_params.get("length", 5))
-        new_osc = st.slider("Oscillations", 5, 50,
-                            st.session_state.simulation_params.get("number_of_oscillations", 10))
+        # Dynamic param controls based on simulation
+        new_params = {}
+        for param_config in param_configs:
+            param_name = param_config["name"]
+            display_name = param_config["display_name"]
+            default_val = param_config["default"]
+            min_val = param_config.get("min")
+            max_val = param_config.get("max")
+            options = param_config.get("options")
+            
+            current_val = st.session_state.simulation_params.get(param_name, default_val)
+            
+            if options is not None:
+                if isinstance(options[0], bool):
+                    new_params[param_name] = st.checkbox(display_name, value=bool(current_val))
+                else:
+                    new_params[param_name] = st.selectbox(display_name, options=options, 
+                        index=options.index(current_val) if current_val in options else 0)
+            elif min_val is not None and max_val is not None:
+                step = 1 if isinstance(default_val, int) else 0.5
+                new_params[param_name] = st.slider(display_name, min_val, max_val, 
+                    int(current_val) if isinstance(default_val, int) else float(current_val),
+                    step=int(step) if isinstance(default_val, int) else step)
         
         if st.button("Update Simulation"):
             st.session_state.previous_params = st.session_state.simulation_params.copy()
-            st.session_state.simulation_params = {
-                "length": new_length,
-                "number_of_oscillations": new_osc
-            }
+            st.session_state.simulation_params = new_params
             st.session_state.show_simulation_comparison = True
             st.rerun()
         
         # Demo messages
         if st.button("Add Demo Teacher Message"):
             add_message_to_chat("teacher", 
-                "👋 Hello! Let's explore the pendulum together.\n\n**OBSERVE:** What do you notice about how fast the pendulum swings?")
+                f"👋 Hello! Let's explore {sim_name} together.\n\n**OBSERVE:** What do you notice?")
             st.rerun()
         
         if st.button("Reset Demo"):
             clear_chat()
-            st.session_state.simulation_params = get_initial_params()
+            sim_id = st.session_state.get("current_simulation", "simple_pendulum")
+            st.session_state.simulation_params = get_initial_params(sim_id)
             st.session_state.previous_params = None
             st.session_state.show_simulation_comparison = False
             st.rerun()
@@ -682,33 +707,64 @@ def main():
                     st.markdown("### 🎛️ Set Your Parameters")
                     st.info("💡 Adjust the parameters below and click SUBMIT to test your answer!")
                     
-                    # Initialize quiz params in session state if not present
-                    if "quiz_params" not in st.session_state:
-                        st.session_state.quiz_params = display_data["current_params"].copy()
+                    # Always sync quiz params with backend's current_params to reflect agent's changes
+                    # This ensures if agent turned on show_proof_lines, it shows in the UI
+                    st.session_state.quiz_params = display_data["current_params"].copy()
                     
-                    # Create sliders for each parameter
+                    # Get parameter config for current simulation
+                    from streamlit_config import SIMULATIONS
+                    sim_config = SIMULATIONS.get(st.session_state.current_simulation, {})
+                    param_configs = sim_config.get("parameters", [])
+                    
+                    # Create sliders/controls for each parameter dynamically
                     quiz_params = {}
-                    col1, col2 = st.columns(2)
                     
-                    with col1:
-                        quiz_params["length"] = st.slider(
-                            "🔗 Pendulum Length",
-                            min_value=1,
-                            max_value=10,
-                            value=st.session_state.quiz_params.get("length", 5),
-                            step=1,
-                            help="Longer pendulum = slower swings"
-                        )
+                    # Split into columns for better layout
+                    num_params = len(param_configs)
+                    cols = st.columns(min(num_params, 2))
                     
-                    with col2:
-                        quiz_params["number_of_oscillations"] = st.slider(
-                            "🔄 Number of Oscillations",
-                            min_value=5,
-                            max_value=50,
-                            value=st.session_state.quiz_params.get("number_of_oscillations", 10),
-                            step=5,
-                            help="How many swings to observe"
-                        )
+                    for idx, param_config in enumerate(param_configs):
+                        param_name = param_config["name"]
+                        display_name = param_config["display_name"]
+                        default_val = param_config["default"]
+                        min_val = param_config.get("min")
+                        max_val = param_config.get("max")
+                        options = param_config.get("options")
+                        
+                        # Use alternating columns
+                        col = cols[idx % len(cols)]
+                        
+                        with col:
+                            current_val = st.session_state.quiz_params.get(param_name, default_val)
+                            
+                            if options is not None:
+                                # For parameters with fixed options (dropdown or checkbox)
+                                if isinstance(options[0], bool):
+                                    # Boolean toggle
+                                    quiz_params[param_name] = st.checkbox(
+                                        f"✨ {display_name}",
+                                        value=bool(current_val) if current_val is not None else default_val,
+                                        help=f"Toggle {display_name.lower()}"
+                                    )
+                                else:
+                                    # Dropdown selection
+                                    quiz_params[param_name] = st.selectbox(
+                                        f"📋 {display_name}",
+                                        options=options,
+                                        index=options.index(current_val) if current_val in options else 0,
+                                        help=f"Select {display_name.lower()}"
+                                    )
+                            elif min_val is not None and max_val is not None:
+                                # Numeric slider
+                                step = 1 if isinstance(default_val, int) else 0.5
+                                quiz_params[param_name] = st.slider(
+                                    f"🎚️ {display_name}",
+                                    min_value=min_val,
+                                    max_value=max_val,
+                                    value=int(current_val) if isinstance(default_val, int) else float(current_val),
+                                    step=int(step) if isinstance(default_val, int) else step,
+                                    help=f"Adjust {display_name.lower()}"
+                                )
                     
                     # Update session state with new values
                     st.session_state.quiz_params = quiz_params
