@@ -411,6 +411,212 @@ QUIZ_QUESTIONS = {
             },
             "concept_reminder": "Shadow length depends on the distance between the light source and the object. Closer light sources create longer shadows, while farther light sources create shorter shadows."
         }
+    ],
+    
+    "angle_sum_property": [
+        {
+            "id": "angle_q1",
+            "challenge": "Show the geometric proof! Enable the proof visualization to understand why triangle angles always sum to 180 degrees.",
+            "target_parameters": ["show_proof_lines"],
+            "success_rule": {
+                "conditions": [
+                    {"parameter": "show_proof_lines", "operator": "==", "value": True}
+                ],
+                "scoring": {
+                    "perfect": 1.0,
+                    "partial": 0.0,
+                    "wrong": 0.0
+                },
+                "thresholds": {
+                    "perfect": {"show_proof_lines": True}
+                }
+            },
+            "hints": {
+                "attempt_1": "You need to enable the proof visualization. Look for the control to show the proof steps.",
+                "attempt_2": "The proof uses a parallel line through the top vertex. Try turning on the proof display.",
+                "attempt_3": "Set 'Show Proof Steps' to true to reveal the parallel line and alternate angles that prove the angle sum property."
+            },
+            "concept_reminder": "The parallel line proof shows that the three angles of a triangle can be rearranged at one vertex to form a straight line (180°), using the property of alternate interior angles formed by parallel lines."
+        },
+        {
+            "id": "angle_q2",
+            "challenge": "Verify the angle sum property yourself! Change the triangle shape and observe that the angle sum always remains 180 degrees, no matter what.",
+            "target_parameters": ["vertexA_y", "vertexC_x"],
+            "success_rule": {
+                "conditions": [
+                    {"parameter": "vertexA_y", "operator": "!=", "value": 150},
+                    {"parameter": "vertexC_x", "operator": "!=", "value": 800}
+                ],
+                "scoring": {
+                    "perfect": 1.0,
+                    "partial": 0.6,
+                    "wrong": 0.3
+                },
+                "thresholds": {
+                    "perfect": {"any_changed": True}
+                }
+            },
+            "hints": {
+                "attempt_1": "Try moving the triangle vertices to create a different shape. Does the angle sum still equal 180°?",
+                "attempt_2": "Change the position of vertex A or vertex C to make a different triangle. The angle sum should remain constant.",
+                "attempt_3": "Adjust any vertex position to verify that triangle angles always sum to 180° regardless of the shape."
+            },
+            "concept_reminder": "The angle sum property is universal for all triangles. No matter if it's equilateral, isosceles, scalene, acute, or obtuse - the interior angles always add up to exactly 180 degrees."
+        }
+    ],
+    
+    "angle_sum_property": [
+        {
+            "id": "angle_q1",
+            "challenge": "Show the geometric proof! Enable the proof visualization to understand why triangle angles always sum to 180 degrees.",
+            "target_parameters": ["show_proof_lines"],
+            "success_rule": {
+                "conditions": [
+                    {"parameter": "show_proof_lines", "operator": "==", "value": True}
+                ],
+                "scoring": {
+                    "perfect": 1.0,
+                    "partial": 0.0,
+                    "wrong": 0.0
+                },
+                "thresholds": {
+                    "perfect": {"show_proof_lines": True}
+                }
+            },
+            "hints": {
+                "attempt_1": "You need to enable the proof visualization. Look for the control to show the proof steps.",
+                "attempt_2": "The proof uses a parallel line through the top vertex. Try turning on the proof display.",
+                "attempt_3": "Set 'Show Proof Steps' to true to reveal the parallel line and alternate angles that prove the angle sum property."
+            },
+            "concept_reminder": "The parallel line proof shows that the three angles of a triangle can be rearranged at one vertex to form a straight line (180°), using the property of alternate interior angles formed by parallel lines."
+        },
+        {
+            "id": "angle_q2",
+            "challenge": "Verify the angle sum property yourself! Change the triangle shape and observe that the angle sum always remains 180 degrees, no matter what.",
+            "target_parameters": ["vertexA_y", "vertexC_x"],
+            "success_rule": {
+                "conditions": [
+                    {"parameter": "vertexA_y", "operator": "!=", "value": 150},
+                    {"parameter": "vertexC_x", "operator": "!=", "value": 800}
+                ],
+                "scoring": {
+                    "perfect": 1.0,
+                    "partial": 0.6,
+                    "wrong": 0.3
+                },
+                "thresholds": {
+                    "perfect": {"any_changed": True}
+                }
+            },
+            "hints": {
+                "attempt_1": "Try moving the triangle vertices to create a different shape. Does the angle sum still equal 180°?",
+                "attempt_2": "Change the position of vertex A or vertex C to make a different triangle. The angle sum should remain constant.",
+                "attempt_3": "Adjust any vertex position to verify that triangle angles always sum to 180° regardless of the shape."
+            },
+            "concept_reminder": "The angle sum property is universal for all triangles. No matter if it's equilateral, isosceles, scalene, acute, or obtuse - the interior angles always add up to exactly 180 degrees."
+        }
+    ]
+}
+    
+    # ═══════════════════════════════════════════════════════════════════════
+    # ANGLE SUM PROPERTY SIMULATION (in SIMULATIONS dict above)
+    # ═══════════════════════════════════════════════════════════════════════
+
+SIMULATIONS["angle_sum_property"] = {
+    "title": "Triangle Angle Sum",
+    "file": "simulations/AngleSumProperty.html",
+    "description": """
+An interactive triangle simulation where you can drag vertices to change 
+the triangle's shape and observe that the sum of interior angles always 
+equals 180 degrees. Includes a geometric proof using parallel lines.
+
+What can be demonstrated:
+- Triangle interior angles sum to 180°
+- Angle sum remains constant regardless of triangle shape
+- Geometric proof using parallel lines and alternate angles
+- Relationship between triangle angles and parallel line properties
+""",
+    "cannot_demonstrate": [
+        "Exterior angles",
+        "Triangle area calculations",
+        "Side length relationships",
+        "Pythagorean theorem"
+    ],
+    "initial_params": {
+        "vertexA_x": 500,
+        "vertexA_y": 150,
+        "vertexB_x": 200,
+        "vertexB_y": 450,
+        "vertexC_x": 800,
+        "vertexC_y": 450,
+        "show_proof_lines": False
+    },
+    "parameter_info": {
+        "show_proof_lines": {
+            "label": "Show Proof Steps",
+            "range": "true/false",
+            "url_key": "show_proof_lines",
+            "effect": "Shows parallel line through vertex A and demonstrates alternate angles proof"
+        },
+        "vertexA_x": {
+            "label": "Vertex A X Position",
+            "range": "50-950 pixels",
+            "url_key": "vertexA_x",
+            "effect": "Horizontal position of top vertex A"
+        },
+        "vertexA_y": {
+            "label": "Vertex A Y Position",
+            "range": "50-550 pixels",
+            "url_key": "vertexA_y",
+            "effect": "Vertical position of top vertex A"
+        },
+        "vertexB_x": {
+            "label": "Vertex B X Position",
+            "range": "50-950 pixels",
+            "url_key": "vertexB_x",
+            "effect": "Horizontal position of bottom-left vertex B"
+        },
+        "vertexB_y": {
+            "label": "Vertex B Y Position",
+            "range": "50-550 pixels",
+            "url_key": "vertexB_y",
+            "effect": "Vertical position of bottom-left vertex B"
+        },
+        "vertexC_x": {
+            "label": "Vertex C X Position",
+            "range": "50-950 pixels",
+            "url_key": "vertexC_x",
+            "effect": "Horizontal position of bottom-right vertex C"
+        },
+        "vertexC_y": {
+            "label": "Vertex C Y Position",
+            "range": "50-550 pixels",
+            "url_key": "vertexC_y",
+            "effect": "Vertical position of bottom-right vertex C"
+        }
+    },
+    "concepts": [
+        {
+            "id": 1,
+            "title": "Triangle Angle Sum Property",
+            "description": "The sum of the three interior angles in any triangle is always 180 degrees, regardless of the triangle's shape or size.",
+            "key_insight": "No matter how you change the triangle shape, angle A + angle B + angle C always equals 180°",
+            "related_params": ["vertexA_x", "vertexA_y", "vertexB_x", "vertexB_y", "vertexC_x", "vertexC_y"]
+        },
+        {
+            "id": 2,
+            "title": "Parallel Lines and Alternate Angles",
+            "description": "When a line intersects two parallel lines, it creates alternate interior angles that are equal. This property helps prove the angle sum theorem.",
+            "key_insight": "A line parallel to the base through vertex A creates alternate angles equal to angles B and C",
+            "related_params": ["show_proof_lines"]
+        },
+        {
+            "id": 3,
+            "title": "Geometric Proof Visualization",
+            "description": "The parallel line proof shows that all three angles can be rearranged at one vertex to form a straight line (180°), proving the angle sum property.",
+            "key_insight": "When you show the proof, angles B and C appear at vertex A as alternate angles, and together with angle A, they form a straight line",
+            "related_params": ["show_proof_lines"]
+        }
     ]
 }
 
