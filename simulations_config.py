@@ -251,98 +251,6 @@ alternate interior angles are equal, and co-interior angles sum to 180°.
         "Angles with non-Euclidean geometry",
         "Perpendicular relationships between the parallel lines"
     ],
-    "quiz_questions": lambda: [
-        {
-            "id": "parallel_q1",
-            "challenge": "Set the transversal angle so that ∠1 (the acute red angle at the top) equals 70°. Remember, you can drag the purple transversal line to change the angle.",
-            "hints": [
-                "∠1 is the acute angle formed at the top intersection",
-                "Drag the transversal line up or down to change the angle",
-                "Watch the angle values update as you drag",
-                "The angle should be close to 70° when you're done"
-            ],
-            "target_parameters": ["angle"],
-            "criteria": [
-                {"parameter": "angle", "operator": "between", "min": 68, "max": 72}
-            ],
-            "correct_behavior": {
-                "description": "Angle is set to approximately 70°",
-                "perfect": {"angle": 70}
-            }
-        },
-        {
-            "id": "parallel_q2",
-            "challenge": "Set the transversal so that ∠3 (the obtuse green angle at the top) equals 120°. This will help demonstrate the alternate interior angle relationship.",
-            "hints": [
-                "∠3 is the obtuse (larger) angle at the top intersection",
-                "If ∠3 = 120°, then the acute angle must be 60°",
-                "The obtuse angle is always 180° minus the acute angle",
-                "Adjust the transversal until ∠3 shows 120°"
-            ],
-            "target_parameters": ["angle"],
-            "criteria": [
-                {"parameter": "angle", "operator": "between", "min": 58, "max": 62}
-            ],
-            "correct_behavior": {
-                "description": "Transversal angle set to 60° (making ∠3 = 120°)",
-                "perfect": {"angle": 60}
-            }
-        },
-        {
-            "id": "parallel_q3",
-            "challenge": "Demonstrate co-interior angles by setting ∠3 = 80°. Then observe that ∠6 (at the bottom intersection) equals 100°, and together they sum to 180°.",
-            "hints": [
-                "∠3 is the green obtuse angle at the top",
-                "If ∠3 = 80°, the acute angle should be 100°",
-                "Co-interior angles are on the same side between parallel lines",
-                "Watch how ∠3 and ∠6 always sum to 180°"
-            ],
-            "target_parameters": ["angle"],
-            "criteria": [
-                {"parameter": "angle", "operator": "between", "min": 98, "max": 102}
-            ],
-            "correct_behavior": {
-                "description": "Angle set to 100° (making ∠3 = 80°, ∠6 = 100°, sum = 180°)",
-                "perfect": {"angle": 100}
-            }
-        },
-        {
-            "id": "parallel_q4",
-            "challenge": "Highlight the pair of corresponding angles ∠1 and ∠5. These angles are in the same position at each intersection and are always equal.",
-            "hints": [
-                "Corresponding angles are in the same position at each intersection",
-                "∠1 is at the top right, ∠5 is at the bottom right",
-                "Both are acute red angles in the same relative position",
-                "Use highlightPair to show the 1-5 relationship"
-            ],
-            "target_parameters": ["highlightPair"],
-            "criteria": [
-                {"parameter": "highlightPair", "operator": "==", "value": "1-5"}
-            ],
-            "correct_behavior": {
-                "description": "Highlighted corresponding angles ∠1 and ∠5",
-                "perfect": {"highlightPair": "1-5"}
-            }
-        },
-        {
-            "id": "parallel_q5",
-            "challenge": "Highlight a pair of co-interior angles. These are angles on the SAME side of the transversal, between the parallel lines, that sum to 180°. Choose either ∠4 and ∠5.",
-            "hints": [
-                "Co-interior means same side, between the parallel lines",
-                "∠4 is orange at the top, ∠5 is red at the bottom",
-                "They're both on the right side of the transversal",
-                "These angles should sum to 180°"
-            ],
-            "target_parameters": ["highlightPair"],
-            "criteria": [
-                {"parameter": "highlightPair", "operator": "in", "value": ["4-5", "3-6"]}
-            ],
-            "correct_behavior": {
-                "description": "Highlighted co-interior angle pair",
-                "perfect": {"highlightPair": "4-5"}
-            }
-        }
-    ],
     "initial_params": {
         "angle": 60,
         "phase": "explore",
@@ -643,39 +551,15 @@ QUIZ_QUESTIONS = {
         }
     ],
     
-    "angle_sum_property": [
+    "parallel_lines_angles": [
         {
-            "id": "angle_q1",
-            "challenge": "Show the geometric proof! Enable the proof visualization to understand why triangle angles always sum to 180 degrees.",
-            "target_parameters": ["show_proof_lines"],
+            "id": "parallel_q1",
+            "challenge": "Set the transversal angle to 70° to demonstrate corresponding angles. Corresponding angles are equal when parallel lines are cut by a transversal.",
+            "target_parameters": ["angle"],
             "success_rule": {
                 "conditions": [
-                    {"parameter": "show_proof_lines", "operator": "==", "value": True}
-                ],
-                "scoring": {
-                    "perfect": 1.0,
-                    "partial": 0.0,
-                    "wrong": 0.0
-                },
-                "thresholds": {
-                    "perfect": {"show_proof_lines": True}
-                }
-            },
-            "hints": {
-                "attempt_1": "You need to enable the proof visualization. Look for the control to show the proof steps.",
-                "attempt_2": "The proof uses a parallel line through the top vertex. Try turning on the proof display.",
-                "attempt_3": "Set 'Show Proof Steps' to true to reveal the parallel line and alternate angles that prove the angle sum property."
-            },
-            "concept_reminder": "The parallel line proof shows that the three angles of a triangle can be rearranged at one vertex to form a straight line (180°), using the property of alternate interior angles formed by parallel lines."
-        },
-        {
-            "id": "angle_q2",
-            "challenge": "Verify the angle sum property yourself! Change the triangle shape and observe that the angle sum always remains 180 degrees, no matter what.",
-            "target_parameters": ["vertexA_y", "vertexC_x"],
-            "success_rule": {
-                "conditions": [
-                    {"parameter": "vertexA_y", "operator": "!=", "value": 150},
-                    {"parameter": "vertexC_x", "operator": "!=", "value": 800}
+                    {"parameter": "angle", "operator": ">=", "value": 68},
+                    {"parameter": "angle", "operator": "<=", "value": 72}
                 ],
                 "scoring": {
                     "perfect": 1.0,
@@ -683,15 +567,117 @@ QUIZ_QUESTIONS = {
                     "wrong": 0.3
                 },
                 "thresholds": {
-                    "perfect": {"any_changed": True}
+                    "perfect": {"angle": 70},
+                    "partial": {"angle": 69}
                 }
             },
             "hints": {
-                "attempt_1": "Try moving the triangle vertices to create a different shape. Does the angle sum still equal 180°?",
-                "attempt_2": "Change the position of vertex A or vertex C to make a different triangle. The angle sum should remain constant.",
-                "attempt_3": "Adjust any vertex position to verify that triangle angles always sum to 180° regardless of the shape."
+                "attempt_1": "∠1 is the acute angle formed at the top intersection. Drag the transversal to change the angle.",
+                "attempt_2": "Watch the angle values update as you drag. You need to get close to 70°.",
+                "attempt_3": "Adjust the transversal until the angle reads approximately 70°."
             },
-            "concept_reminder": "The angle sum property is universal for all triangles. No matter if it's equilateral, isosceles, scalene, acute, or obtuse - the interior angles always add up to exactly 180 degrees."
+            "concept_reminder": "Corresponding angles are in the same position at each intersection. When parallel lines are cut by a transversal, corresponding angles are always equal."
+        },
+        {
+            "id": "parallel_q2",
+            "challenge": "Set the angle to 60° to make the obtuse angle ∠3 equal to 120°. This demonstrates alternate interior angles.",
+            "target_parameters": ["angle"],
+            "success_rule": {
+                "conditions": [
+                    {"parameter": "angle", "operator": ">=", "value": 58},
+                    {"parameter": "angle", "operator": "<=", "value": 62}
+                ],
+                "scoring": {
+                    "perfect": 1.0,
+                    "partial": 0.6,
+                    "wrong": 0.3
+                },
+                "thresholds": {
+                    "perfect": {"angle": 60},
+                    "partial": {"angle": 59}
+                }
+            },
+            "hints": {
+                "attempt_1": "∠3 is the obtuse angle at the top. If the acute angle is 60°, then ∠3 will be 120°.",
+                "attempt_2": "The obtuse angle is always 180° minus the acute angle. Set the acute angle to 60°.",
+                "attempt_3": "Adjust the transversal until the acute angle shows 60°, making the obtuse angle 120°."
+            },
+            "concept_reminder": "Alternate interior angles are on opposite sides of the transversal, between parallel lines, and are always equal."
+        },
+        {
+            "id": "parallel_q3",
+            "challenge": "Set the angle to 100° to demonstrate that co-interior angles sum to 180°. The obtuse angle ∠3 will be 80°, and ∠6 will be 100°.",
+            "target_parameters": ["angle"],
+            "success_rule": {
+                "conditions": [
+                    {"parameter": "angle", "operator": ">=", "value": 98},
+                    {"parameter": "angle", "operator": "<=", "value": 102}
+                ],
+                "scoring": {
+                    "perfect": 1.0,
+                    "partial": 0.6,
+                    "wrong": 0.3
+                },
+                "thresholds": {
+                    "perfect": {"angle": 100},
+                    "partial": {"angle": 99}
+                }
+            },
+            "hints": {
+                "attempt_1": "Co-interior angles are on the same side of the transversal, between the parallel lines.",
+                "attempt_2": "If you set the acute angle to 100°, the obtuse angle will be 80°, and they sum to 180°.",
+                "attempt_3": "Adjust to 100° and watch how ∠3 (80°) and ∠6 (100°) sum to 180°."
+            },
+            "concept_reminder": "Co-interior angles (also called consecutive interior angles) are on the same side of the transversal, between parallel lines, and always sum to 180°."
+        },
+        {
+            "id": "parallel_q4",
+            "challenge": "Use the highlight feature to show the corresponding angle pair ∠1 and ∠5. These angles are in the same relative position.",
+            "target_parameters": ["highlightPair"],
+            "success_rule": {
+                "conditions": [
+                    {"parameter": "highlightPair", "operator": "==", "value": "1-5"}
+                ],
+                "scoring": {
+                    "perfect": 1.0,
+                    "partial": 0.0,
+                    "wrong": 0.0
+                },
+                "thresholds": {
+                    "perfect": {"highlightPair": "1-5"}
+                }
+            },
+            "hints": {
+                "attempt_1": "Corresponding angles are in the same position at each intersection.",
+                "attempt_2": "∠1 is at the top right, ∠5 is at the bottom right - same position.",
+                "attempt_3": "Set highlightPair to '1-5' to show these corresponding angles."
+            },
+            "concept_reminder": "Corresponding angles are in matching positions at each intersection where the transversal crosses the parallel lines."
+        },
+        {
+            "id": "parallel_q5",
+            "challenge": "Highlight the co-interior angle pair ∠4 and ∠5. These angles are on the same side of the transversal and sum to 180°.",
+            "target_parameters": ["highlightPair"],
+            "success_rule": {
+                "conditions": [
+                    {"parameter": "highlightPair", "operator": "in", "value": ["4-5", "3-6"]}
+                ],
+                "scoring": {
+                    "perfect": 1.0,
+                    "partial": 0.6,
+                    "wrong": 0.0
+                },
+                "thresholds": {
+                    "perfect": {"highlightPair": "4-5"},
+                    "partial": {"highlightPair": "3-6"}
+                }
+            },
+            "hints": {
+                "attempt_1": "Co-interior angles are on the same side of the transversal, between the parallel lines.",
+                "attempt_2": "∠4 and ∠5 are both on the right side - they're co-interior angles.",
+                "attempt_3": "Set highlightPair to '4-5' or '3-6' to show co-interior angle pairs."
+            },
+            "concept_reminder": "Co-interior angles lie on the same side of the transversal, between the parallel lines, and their sum is always 180°."
         }
     ]
 }
