@@ -206,6 +206,184 @@ What can be demonstrated:
     }
 }
 
+# =============================================================================
+# PARALLEL LINES & TRANSVERSAL SIMULATION
+# =============================================================================
+SIMULATIONS["parallel_lines_angles"] = {
+    "title": "Parallel Lines & Transversal",
+    "file": "simulations/parallel-angles-interactive.html",
+    "description": """
+An interactive simulation where you explore angle relationships when a transversal 
+line crosses two parallel lines. Drag the purple transversal to change its angle 
+and observe how all 8 angles change together. Discover why corresponding angles are equal, 
+alternate interior angles are equal, and co-interior angles sum to 180°.
+    """.strip(),
+    "concepts": [
+        {
+            "id": 1,
+            "title": "Corresponding Angles",
+            "key_insight": "When a transversal crosses parallel lines, angles in the same position at each intersection are always equal (∠1 = ∠5, ∠2 = ∠6, ∠3 = ∠7, ∠4 = ∠8)",
+            "related_params": ["angle", "highlightPair"]
+        },
+        {
+            "id": 2,
+            "title": "Alternate Interior Angles",
+            "key_insight": "Angles on opposite sides of the transversal, between the parallel lines, are always equal (∠3 = ∠5, ∠4 = ∠6)",
+            "related_params": ["angle", "highlightPair"]
+        },
+        {
+            "id": 3,
+            "title": "Co-interior Angles (Consecutive Interior)",
+            "key_insight": "Angles on the same side of the transversal, between parallel lines, always sum to 180° (∠3 + ∠6 = 180°, ∠4 + ∠5 = 180°)",
+            "related_params": ["angle", "highlightPair"]
+        },
+        {
+            "id": 4,
+            "title": "Vertically Opposite Angles",
+            "key_insight": "When two lines intersect, angles opposite each other are always equal (∠1 = ∠4, ∠2 = ∠3, ∠5 = ∠8, ∠6 = ∠7)",
+            "related_params": ["angle"]
+        }
+    ],
+    "cannot_demonstrate": [
+        "Non-parallel lines",
+        "More than two parallel lines",
+        "Curved transversal",
+        "Angles with non-Euclidean geometry",
+        "Perpendicular relationships between the parallel lines"
+    ],
+    "quiz_questions": lambda: [
+        {
+            "id": "parallel_q1",
+            "challenge": "Set the transversal angle so that ∠1 (the acute red angle at the top) equals 70°. Remember, you can drag the purple transversal line to change the angle.",
+            "hints": [
+                "∠1 is the acute angle formed at the top intersection",
+                "Drag the transversal line up or down to change the angle",
+                "Watch the angle values update as you drag",
+                "The angle should be close to 70° when you're done"
+            ],
+            "target_parameters": ["angle"],
+            "criteria": [
+                {"parameter": "angle", "operator": "between", "min": 68, "max": 72}
+            ],
+            "correct_behavior": {
+                "description": "Angle is set to approximately 70°",
+                "perfect": {"angle": 70}
+            }
+        },
+        {
+            "id": "parallel_q2",
+            "challenge": "Set the transversal so that ∠3 (the obtuse green angle at the top) equals 120°. This will help demonstrate the alternate interior angle relationship.",
+            "hints": [
+                "∠3 is the obtuse (larger) angle at the top intersection",
+                "If ∠3 = 120°, then the acute angle must be 60°",
+                "The obtuse angle is always 180° minus the acute angle",
+                "Adjust the transversal until ∠3 shows 120°"
+            ],
+            "target_parameters": ["angle"],
+            "criteria": [
+                {"parameter": "angle", "operator": "between", "min": 58, "max": 62}
+            ],
+            "correct_behavior": {
+                "description": "Transversal angle set to 60° (making ∠3 = 120°)",
+                "perfect": {"angle": 60}
+            }
+        },
+        {
+            "id": "parallel_q3",
+            "challenge": "Demonstrate co-interior angles by setting ∠3 = 80°. Then observe that ∠6 (at the bottom intersection) equals 100°, and together they sum to 180°.",
+            "hints": [
+                "∠3 is the green obtuse angle at the top",
+                "If ∠3 = 80°, the acute angle should be 100°",
+                "Co-interior angles are on the same side between parallel lines",
+                "Watch how ∠3 and ∠6 always sum to 180°"
+            ],
+            "target_parameters": ["angle"],
+            "criteria": [
+                {"parameter": "angle", "operator": "between", "min": 98, "max": 102}
+            ],
+            "correct_behavior": {
+                "description": "Angle set to 100° (making ∠3 = 80°, ∠6 = 100°, sum = 180°)",
+                "perfect": {"angle": 100}
+            }
+        },
+        {
+            "id": "parallel_q4",
+            "challenge": "Highlight the pair of corresponding angles ∠1 and ∠5. These angles are in the same position at each intersection and are always equal.",
+            "hints": [
+                "Corresponding angles are in the same position at each intersection",
+                "∠1 is at the top right, ∠5 is at the bottom right",
+                "Both are acute red angles in the same relative position",
+                "Use highlightPair to show the 1-5 relationship"
+            ],
+            "target_parameters": ["highlightPair"],
+            "criteria": [
+                {"parameter": "highlightPair", "operator": "==", "value": "1-5"}
+            ],
+            "correct_behavior": {
+                "description": "Highlighted corresponding angles ∠1 and ∠5",
+                "perfect": {"highlightPair": "1-5"}
+            }
+        },
+        {
+            "id": "parallel_q5",
+            "challenge": "Highlight a pair of co-interior angles. These are angles on the SAME side of the transversal, between the parallel lines, that sum to 180°. Choose either ∠4 and ∠5.",
+            "hints": [
+                "Co-interior means same side, between the parallel lines",
+                "∠4 is orange at the top, ∠5 is red at the bottom",
+                "They're both on the right side of the transversal",
+                "These angles should sum to 180°"
+            ],
+            "target_parameters": ["highlightPair"],
+            "criteria": [
+                {"parameter": "highlightPair", "operator": "in", "value": ["4-5", "3-6"]}
+            ],
+            "correct_behavior": {
+                "description": "Highlighted co-interior angle pair",
+                "perfect": {"highlightPair": "4-5"}
+            }
+        }
+    ],
+    "initial_params": {
+        "angle": 60,
+        "phase": "explore",
+        "highlightPair": None,
+        "showRelationships": True,
+        "lockAngle": False
+    },
+    "parameter_info": {
+        "angle": {
+            "label": "Transversal Angle",
+            "range": "20-160 degrees",
+            "url_key": "angle",
+            "effect": "Changes the acute angle of the transversal line crossing the parallel lines"
+        },
+        "phase": {
+            "label": "Phase",
+            "range": "explore, quiz",
+            "url_key": "phase",
+            "effect": "Switches between exploration mode and built-in quiz mode"
+        },
+        "highlightPair": {
+            "label": "Highlight Angle Pair",
+            "range": "None, '1-5', '2-6', '3-7', '4-8', '3-5', '4-6', '3-6', '4-5'",
+            "url_key": "highlightPair",
+            "effect": "Highlights specific angle pair to focus student attention on relationships"
+        },
+        "showRelationships": {
+            "label": "Show Relationships",
+            "range": "true/false",
+            "url_key": "showRelationships",
+            "effect": "Shows or hides the relationship cards explaining angle types (corresponding, alternate, co-interior)"
+        },
+        "lockAngle": {
+            "label": "Lock Angle",
+            "range": "true/false",
+            "url_key": "lockAngle",
+            "effect": "Prevents student from dragging transversal - useful for demonstrations"
+        }
+    }
+}
+
 # ═══════════════════════════════════════════════════════════════════════
 # HELPER FUNCTIONS
 # ═══════════════════════════════════════════════════════════════════════

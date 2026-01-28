@@ -168,8 +168,68 @@ SIMULATIONS = {
         ],
         "auto_start_param": "autoStart",
         "topic": "Triangle Angle Sum"
+    },
+    
+    "parallel_lines_angles": {
+        "name": "Parallel Lines & Transversal",
+        "description": "Explore angle relationships when a transversal crosses parallel lines",
+        "base_url": f"{GITHUB_PAGES_BASE}/parallel-angles-interactive.html",
+        "parameters": [
+            {
+                "name": "angle",
+                "display_name": "Transversal Angle",
+                "default": 60,
+                "min": 20,
+                "max": 160,
+                "unit": "degrees",
+                "url_param": "angle"
+            },
+            {
+                "name": "phase",
+                "display_name": "Phase",
+                "default": "explore",
+                "min": None,
+                "max": None,
+                "unit": "",
+                "url_param": "phase",
+                "options": ["explore", "quiz"]
+            },
+            {
+                "name": "highlightPair",
+                "display_name": "Highlight Angle Pair",
+                "default": None,
+                "min": None,
+                "max": None,
+                "unit": "",
+                "url_param": "highlightPair",
+                "options": [None, "1-5", "2-6", "3-7", "4-8", "3-5", "4-6", "3-6", "4-5"]
+            },
+            {
+                "name": "showRelationships",
+                "display_name": "Show Relationships",
+                "default": True,
+                "min": None,
+                "max": None,
+                "unit": "",
+                "url_param": "showRelationships",
+                "options": [True, False]
+            },
+            {
+                "name": "lockAngle",
+                "display_name": "Lock Angle",
+                "default": False,
+                "min": None,
+                "max": None,
+                "unit": "",
+                "url_param": "lockAngle",
+                "options": [True, False]
+            }
+        ],
+        "auto_start_param": None,
+        "topic": "Parallel Lines & Transversal"
     }
 }
+
 
 # =============================================================================
 # DEFAULT SIMULATION
