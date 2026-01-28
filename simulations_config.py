@@ -222,24 +222,28 @@ alternate interior angles are equal, and co-interior angles sum to 180°.
         {
             "id": 1,
             "title": "Corresponding Angles",
+            "description": "Understanding angle relationships when a transversal cuts parallel lines - corresponding angles are in matching positions.",
             "key_insight": "When a transversal crosses parallel lines, angles in the same position at each intersection are always equal (∠1 = ∠5, ∠2 = ∠6, ∠3 = ∠7, ∠4 = ∠8)",
             "related_params": ["angle", "highlightPair"]
         },
         {
             "id": 2,
             "title": "Alternate Interior Angles",
+            "description": "Exploring angles on opposite sides of a transversal between parallel lines.",
             "key_insight": "Angles on opposite sides of the transversal, between the parallel lines, are always equal (∠3 = ∠5, ∠4 = ∠6)",
             "related_params": ["angle", "highlightPair"]
         },
         {
             "id": 3,
             "title": "Co-interior Angles (Consecutive Interior)",
+            "description": "Investigating angles on the same side of a transversal between parallel lines.",
             "key_insight": "Angles on the same side of the transversal, between parallel lines, always sum to 180° (∠3 + ∠6 = 180°, ∠4 + ∠5 = 180°)",
             "related_params": ["angle", "highlightPair"]
         },
         {
             "id": 4,
             "title": "Vertically Opposite Angles",
+            "description": "Understanding angle relationships at the intersection of two lines.",
             "key_insight": "When two lines intersect, angles opposite each other are always equal (∠1 = ∠4, ∠2 = ∠3, ∠5 = ∠8, ∠6 = ∠7)",
             "related_params": ["angle"]
         }
