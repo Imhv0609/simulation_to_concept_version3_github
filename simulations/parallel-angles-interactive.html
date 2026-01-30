@@ -425,9 +425,6 @@ function renderDiagram(svgId = 'diagram', interactive = true) {
   // Check if angle is locked (for demo mode)
   const isDraggable = interactive && !lockAngle;
   
-  // Determine which angles to highlight
-  const highlights = highlightPair ? highlightPair.split('-').map(n => parseInt(n)) : [];
-  
   // Arc indicator (just a small curve to show angle)
   function arc(cx, cy, startDeg, endDeg, color, angleNum) {
     const r = 22;
@@ -438,21 +435,8 @@ function renderDiagram(svgId = 'diagram', interactive = true) {
     const x2 = cx + r * Math.cos(e);
     const y2 = cy + r * Math.sin(e);
     
-    // Highlight if this angle is in the highlight pair
-    const isHighlighted = highlights.includes(angleNum);
-    const opacity = isHighlighted ? 1.0 : 0.4;
-    const strokeWidth = isHighlighted ? 6 : 2.5;
-    
-    // Add pulsing animation for highlighted angles
-    const animation = isHighlighted ? `
-      <animate attributeName="stroke-width" values="${strokeWidth};${strokeWidth + 2};${strokeWidth}" dur="1.5s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="1;0.7;1" dur="1.5s" repeatCount="indefinite"/>
-    ` : '';
-    
     return `<path d="M ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2}" 
-            fill="none" stroke="${color}" stroke-width="${strokeWidth}" stroke-linecap="round" opacity="${opacity}">
-            ${animation}
-            </path>`;
+            fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" opacity="0.8"/>`;
   }
   
   svg.innerHTML = `
@@ -494,27 +478,17 @@ function renderDiagram(svgId = 'diagram', interactive = true) {
     <circle cx="${t.int1.x}" cy="${t.int1.y}" r="5" fill="#333"/>
     <circle cx="${t.int2.x}" cy="${t.int2.y}" r="5" fill="#333"/>
     
-    <!-- Helper function for label styling -->
-    ${(() => {
-      const labelStyle = (num) => {
-        const isHighlighted = highlights.includes(num);
-        return `font-size="${isHighlighted ? '18' : '14'}" font-weight="${isHighlighted ? '900' : '700'}" opacity="${isHighlighted ? '1' : '0.6'}"`;
-      };
-      
-      return `
-        <!-- Angle labels at intersection 1 -->
-        <text x="${t.int1.x + 30}" y="${t.int1.y - 12}" ${labelStyle(1)} fill="#e74c3c">1</text>
-        <text x="${t.int1.x - 40}" y="${t.int1.y - 12}" ${labelStyle(2)} fill="#3498db">2</text>
-        <text x="${t.int1.x - 40}" y="${t.int1.y + 24}" ${labelStyle(3)} fill="#27ae60">3</text>
-        <text x="${t.int1.x + 30}" y="${t.int1.y + 24}" ${labelStyle(4)} fill="#f39c12">4</text>
-        
-        <!-- Angle labels at intersection 2 -->
-        <text x="${t.int2.x + 30}" y="${t.int2.y - 12}" ${labelStyle(5)} fill="#e74c3c">5</text>
-        <text x="${t.int2.x - 40}" y="${t.int2.y - 12}" ${labelStyle(6)} fill="#3498db">6</text>
-        <text x="${t.int2.x - 40}" y="${t.int2.y + 24}" ${labelStyle(7)} fill="#27ae60">7</text>
-        <text x="${t.int2.x + 30}" y="${t.int2.y + 24}" ${labelStyle(8)} fill="#f39c12">8</text>
-      `;
-    })()}
+    <!-- Angle labels at intersection 1 -->
+    <text x="${t.int1.x + 30}" y="${t.int1.y - 12}" font-size="14" font-weight="700" fill="#e74c3c">1</text>
+    <text x="${t.int1.x - 40}" y="${t.int1.y - 12}" font-size="14" font-weight="700" fill="#3498db">2</text>
+    <text x="${t.int1.x - 40}" y="${t.int1.y + 24}" font-size="14" font-weight="700" fill="#27ae60">3</text>
+    <text x="${t.int1.x + 30}" y="${t.int1.y + 24}" font-size="14" font-weight="700" fill="#f39c12">4</text>
+    
+    <!-- Angle labels at intersection 2 -->
+    <text x="${t.int2.x + 30}" y="${t.int2.y - 12}" font-size="14" font-weight="700" fill="#e74c3c">5</text>
+    <text x="${t.int2.x - 40}" y="${t.int2.y - 12}" font-size="14" font-weight="700" fill="#3498db">6</text>
+    <text x="${t.int2.x - 40}" y="${t.int2.y + 24}" font-size="14" font-weight="700" fill="#27ae60">7</text>
+    <text x="${t.int2.x + 30}" y="${t.int2.y + 24}" font-size="14" font-weight="700" fill="#f39c12">8</text>
     
     <!-- Line labels -->
     <text x="305" y="${LINE1_Y + 5}" font-size="15" font-weight="600" fill="#2c3e50">l</text>
