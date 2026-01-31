@@ -558,12 +558,12 @@ QUIZ_QUESTIONS = {
     "parallel_lines_angles": [
         {
             "id": "parallel_q1",
-            "challenge": "Set the transversal angle to 70° to demonstrate corresponding angles. Corresponding angles are equal when parallel lines are cut by a transversal.",
+            "challenge": "The obtuse angle ∠6 (blue, bottom-left) needs to be exactly 125°. Calculate the transversal angle needed and set it. Remember: acute + obtuse = 180°",
             "target_parameters": ["angle"],
             "success_rule": {
                 "conditions": [
-                    {"parameter": "angle", "operator": ">=", "value": 68},
-                    {"parameter": "angle", "operator": "<=", "value": 72}
+                    {"parameter": "angle", "operator": ">=", "value": 53},
+                    {"parameter": "angle", "operator": "<=", "value": 57}
                 ],
                 "scoring": {
                     "perfect": 1.0,
@@ -571,25 +571,25 @@ QUIZ_QUESTIONS = {
                     "wrong": 0.3
                 },
                 "thresholds": {
-                    "perfect": {"angle": 70},
-                    "partial": {"angle": 69}
+                    "perfect": {"angle": 55},
+                    "partial": {"angle": 54}
                 }
             },
             "hints": {
-                "attempt_1": "∠1 is the acute angle formed at the top intersection. Drag the transversal to change the angle.",
-                "attempt_2": "Watch the angle values update as you drag. You need to get close to 70°.",
-                "attempt_3": "Adjust the transversal until the angle reads approximately 70°."
+                "attempt_1": "∠6 is an obtuse angle. If the obtuse angle is 125°, what must the acute angle be?",
+                "attempt_2": "Use the formula: acute angle = 180° - obtuse angle. Calculate: 180° - 125° = ?",
+                "attempt_3": "The acute angle (transversal angle) = 180° - 125° = 55°. Set the transversal to 55°."
             },
-            "concept_reminder": "Corresponding angles are in the same position at each intersection. When parallel lines are cut by a transversal, corresponding angles are always equal."
+            "concept_reminder": "At any intersection, acute and obtuse angles are supplementary (sum to 180°). If you know one, you can calculate the other."
         },
         {
             "id": "parallel_q2",
-            "challenge": "Set the angle to 60° to make the obtuse angle ∠3 equal to 120°. This demonstrates alternate interior angles.",
+            "challenge": "In a real-world measurement, you found ∠1 (red, top-right) to be 42°. Since ∠1 and ∠5 are corresponding angles and must be equal, set the transversal to match this measurement.",
             "target_parameters": ["angle"],
             "success_rule": {
                 "conditions": [
-                    {"parameter": "angle", "operator": ">=", "value": 58},
-                    {"parameter": "angle", "operator": "<=", "value": 62}
+                    {"parameter": "angle", "operator": ">=", "value": 40},
+                    {"parameter": "angle", "operator": "<=", "value": 44}
                 ],
                 "scoring": {
                     "perfect": 1.0,
@@ -597,25 +597,25 @@ QUIZ_QUESTIONS = {
                     "wrong": 0.3
                 },
                 "thresholds": {
-                    "perfect": {"angle": 60},
-                    "partial": {"angle": 59}
+                    "perfect": {"angle": 42},
+                    "partial": {"angle": 41}
                 }
             },
             "hints": {
-                "attempt_1": "∠3 is the obtuse angle at the top. If the acute angle is 60°, then ∠3 will be 120°.",
-                "attempt_2": "The obtuse angle is always 180° minus the acute angle. Set the acute angle to 60°.",
-                "attempt_3": "Adjust the transversal until the acute angle shows 60°, making the obtuse angle 120°."
+                "attempt_1": "∠1 is an acute angle (red color). What is the relationship between ∠1 and the transversal angle?",
+                "attempt_2": "∠1 IS the acute angle at the top intersection. The acute angle equals the transversal angle directly.",
+                "attempt_3": "Since ∠1 = 42° and ∠1 is acute, simply set the transversal to 42°."
             },
-            "concept_reminder": "Alternate interior angles are on opposite sides of the transversal, between parallel lines, and are always equal."
+            "concept_reminder": "Corresponding angles (like ∠1 and ∠5) are in the same position at each intersection and are always equal when lines are parallel."
         },
         {
             "id": "parallel_q3",
-            "challenge": "Set the angle to 100° to demonstrate that co-interior angles sum to 180°. The obtuse angle ∠3 will be 80°, and ∠6 will be 100°.",
+            "challenge": "You need the obtuse angle ∠4 (orange, top-right) to be exactly 138°. Calculate what the transversal angle should be and set it.",
             "target_parameters": ["angle"],
             "success_rule": {
                 "conditions": [
-                    {"parameter": "angle", "operator": ">=", "value": 98},
-                    {"parameter": "angle", "operator": "<=", "value": 102}
+                    {"parameter": "angle", "operator": ">=", "value": 40},
+                    {"parameter": "angle", "operator": "<=", "value": 44}
                 ],
                 "scoring": {
                     "perfect": 1.0,
@@ -623,65 +623,68 @@ QUIZ_QUESTIONS = {
                     "wrong": 0.3
                 },
                 "thresholds": {
-                    "perfect": {"angle": 100},
-                    "partial": {"angle": 99}
+                    "perfect": {"angle": 42},
+                    "partial": {"angle": 41}
                 }
             },
             "hints": {
-                "attempt_1": "Co-interior angles are on the same side of the transversal, between the parallel lines.",
-                "attempt_2": "If you set the acute angle to 100°, the obtuse angle will be 80°, and they sum to 180°.",
-                "attempt_3": "Adjust to 100° and watch how ∠3 (80°) and ∠6 (100°) sum to 180°."
+                "attempt_1": "∠4 is an obtuse angle (orange color). How do you find the acute angle from an obtuse angle?",
+                "attempt_2": "Calculate: acute angle = 180° - obtuse angle = 180° - 138° = ?",
+                "attempt_3": "The calculation gives: 180° - 138° = 42°. Set the transversal to 42°."
             },
-            "concept_reminder": "Co-interior angles (also called consecutive interior angles) are on the same side of the transversal, between parallel lines, and always sum to 180°."
+            "concept_reminder": "Obtuse angles and their adjacent acute angles are supplementary. Knowing one lets you calculate the other using: acute = 180° - obtuse."
         },
         {
             "id": "parallel_q4",
-            "challenge": "Use the highlight feature to show the corresponding angle pair ∠1 and ∠5. These angles are in the same relative position.",
-            "target_parameters": ["highlightPair"],
+            "challenge": "Co-interior angles ∠3 and ∠6 always sum to 180°. If you need ∠3 (green, top-left) to be 67°, what transversal angle achieves this? Set it!",
+            "target_parameters": ["angle"],
             "success_rule": {
                 "conditions": [
-                    {"parameter": "highlightPair", "operator": "==", "value": "1-5"}
-                ],
-                "scoring": {
-                    "perfect": 1.0,
-                    "partial": 0.0,
-                    "wrong": 0.0
-                },
-                "thresholds": {
-                    "perfect": {"highlightPair": "1-5"}
-                }
-            },
-            "hints": {
-                "attempt_1": "Corresponding angles are in the same position at each intersection.",
-                "attempt_2": "∠1 is at the top right, ∠5 is at the bottom right - same position.",
-                "attempt_3": "Set highlightPair to '1-5' to show these corresponding angles."
-            },
-            "concept_reminder": "Corresponding angles are in matching positions at each intersection where the transversal crosses the parallel lines."
-        },
-        {
-            "id": "parallel_q5",
-            "challenge": "Highlight the co-interior angle pair ∠4 and ∠5. These angles are on the same side of the transversal and sum to 180°.",
-            "target_parameters": ["highlightPair"],
-            "success_rule": {
-                "conditions": [
-                    {"parameter": "highlightPair", "operator": "in", "value": ["4-5", "3-6"]}
+                    {"parameter": "angle", "operator": ">=", "value": 65},
+                    {"parameter": "angle", "operator": "<=", "value": 69}
                 ],
                 "scoring": {
                     "perfect": 1.0,
                     "partial": 0.6,
-                    "wrong": 0.0
+                    "wrong": 0.3
                 },
                 "thresholds": {
-                    "perfect": {"highlightPair": "4-5"},
-                    "partial": {"highlightPair": "3-6"}
+                    "perfect": {"angle": 67},
+                    "partial": {"angle": 66}
                 }
             },
             "hints": {
-                "attempt_1": "Co-interior angles are on the same side of the transversal, between the parallel lines.",
-                "attempt_2": "∠4 and ∠5 are both on the right side - they're co-interior angles.",
-                "attempt_3": "Set highlightPair to '4-5' or '3-6' to show co-interior angle pairs."
+                "attempt_1": "First, determine: Is ∠3 an acute angle or an obtuse angle? Look at the color coding.",
+                "attempt_2": "∠3 (green) is an ACUTE angle. The acute angles equal the transversal angle directly.",
+                "attempt_3": "Since ∠3 is acute and needs to be 67°, set the transversal to 67°. Then ∠6 will be 180° - 67° = 113°."
             },
-            "concept_reminder": "Co-interior angles lie on the same side of the transversal, between the parallel lines, and their sum is always 180°."
+            "concept_reminder": "Co-interior angles are on the same side of the transversal, between parallel lines. They always sum to 180° (supplementary)."
+        },
+        {
+            "id": "parallel_q5",
+            "challenge": "Alternate interior angles ∠4 and ∠6 are always equal. If ∠4 (orange, obtuse) needs to be 152°, calculate the required transversal angle. This requires two steps!",
+            "target_parameters": ["angle"],
+            "success_rule": {
+                "conditions": [
+                    {"parameter": "angle", "operator": ">=", "value": 26},
+                    {"parameter": "angle", "operator": "<=", "value": 30}
+                ],
+                "scoring": {
+                    "perfect": 1.0,
+                    "partial": 0.6,
+                    "wrong": 0.3
+                },
+                "thresholds": {
+                    "perfect": {"angle": 28},
+                    "partial": {"angle": 27}
+                }
+            },
+            "hints": {
+                "attempt_1": "∠4 is obtuse (orange). If ∠4 = 152°, what is the acute angle at that intersection?",
+                "attempt_2": "Step 1: Calculate acute angle = 180° - 152° = 28°. The transversal angle equals the acute angle.",
+                "attempt_3": "The transversal angle is 28°. This makes ∠4 = 152° and ∠6 = 152° (they're alternate interior angles)."
+            },
+            "concept_reminder": "Alternate interior angles are on opposite sides of the transversal, between the parallel lines. They are always equal, regardless of being acute or obtuse."
         }
     ]
 }
