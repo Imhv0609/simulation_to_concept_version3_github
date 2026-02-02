@@ -688,6 +688,176 @@ QUIZ_QUESTIONS = {
         }
     ]
 }
+
+# ═══════════════════════════════════════════════════════════════════════
+# INTERACTIVE ANGLE SUM PROPERTY QUIZ QUESTIONS
+# ═══════════════════════════════════════════════════════════════════════
+
+QUIZ_QUESTIONS["angle_sum_interactive"] = [
+    {
+        "id": "angle_sum_q1",
+        "challenge": "Create a right triangle! Position point C so that angle B (blue) becomes exactly 90 degrees. Remember: the angles must still sum to 180°!",
+        "target_parameters": ["Cx", "Cy"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "angleB", "operator": ">=", "value": 88},
+                {"parameter": "angleB", "operator": "<=", "value": 92}
+            ],
+            "scoring": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"angleB_min": 89, "angleB_max": 91},
+                "partial": {"angleB_min": 88, "angleB_max": 92}
+            }
+        },
+        "hints": {
+            "attempt_1": "To make a right angle (90°) at point B, drag point C so that the blue angle becomes 90°. Watch the blue angle value!",
+            "attempt_2": "Move point C vertically or horizontally relative to point B. A right angle at B means the two sides meeting at B are perpendicular.",
+            "attempt_3": "Try moving C to position (80, 160) - this should create a right angle at B. Adjust slightly if needed to get exactly 90°."
+        },
+        "concept_reminder": "A right triangle has one angle equal to 90 degrees. The other two angles must be acute and add up to 90° (since all three must sum to 180°). This creates special angle relationships useful in trigonometry!"
+    },
+    {
+        "id": "angle_sum_q2",
+        "challenge": "If angle A is 45° and angle C is 65°, what should angle B be? Calculate it first, then adjust point C to create these angles. Check your mental math!",
+        "target_parameters": ["Cx", "Cy"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "angleA", "operator": ">=", "value": 43},
+                {"parameter": "angleA", "operator": "<=", "value": 47},
+                {"parameter": "angleC", "operator": ">=", "value": 63},
+                {"parameter": "angleC", "operator": "<=", "value": 67}
+            ],
+            "scoring": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"angleA_min": 44, "angleA_max": 46, "angleC_min": 64, "angleC_max": 66},
+                "partial": {"angleA_min": 43, "angleA_max": 47, "angleC_min": 63, "angleC_max": 67}
+            }
+        },
+        "hints": {
+            "attempt_1": "First, calculate: If A = 45° and C = 65°, then B = 180° - 45° - 65° = ?",
+            "attempt_2": "The answer is B = 70°. Now drag point C and watch all three angle values until A ≈ 45°, B ≈ 70°, and C ≈ 65°.",
+            "attempt_3": "Try positioning C at approximately (270, 250) and fine-tune from there. Watch the live angle displays!"
+        },
+        "concept_reminder": "To find an unknown angle in a triangle: subtract the two known angles from 180°. This is one of the most useful applications of the angle sum property in geometry problems!"
+    },
+    {
+        "id": "angle_sum_q3",
+        "challenge": "Create an obtuse triangle! An obtuse triangle has ONE angle greater than 90°. Make angle C (green) the obtuse angle - aim for around 120°.",
+        "target_parameters": ["Cx", "Cy"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "angleC", "operator": ">=", "value": 115},
+                {"parameter": "angleC", "operator": "<=", "value": 125}
+            ],
+            "scoring": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"angleC_min": 118, "angleC_max": 122},
+                "partial": {"angleC_min": 115, "angleC_max": 125}
+            }
+        },
+        "hints": {
+            "attempt_1": "An obtuse angle is greater than 90°. Drag point C to make the green angle (angle C) larger than 90°.",
+            "attempt_2": "Move point C closer to the line between A and B (but not too close). This will increase angle C.",
+            "attempt_3": "Try positioning C at around (200, 230) to make angle C obtuse. Adjust until it's about 120°."
+        },
+        "concept_reminder": "An obtuse triangle has one angle > 90° (obtuse) and two angles < 90° (acute). The two acute angles must be small enough that all three still sum to 180°. Notice how the other angles get smaller as C becomes larger!"
+    },
+    {
+        "id": "angle_sum_q4",
+        "challenge": "Create an isosceles triangle where two angles are equal! Make angles A and C both approximately 50°. What will angle B be?",
+        "target_parameters": ["Cx", "Cy"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "angleA", "operator": ">=", "value": 48},
+                {"parameter": "angleA", "operator": "<=", "value": 52},
+                {"parameter": "angleC", "operator": ">=", "value": 48},
+                {"parameter": "angleC", "operator": "<=", "value": 52}
+            ],
+            "scoring": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"angleA_min": 49, "angleA_max": 51, "angleC_min": 49, "angleC_max": 51},
+                "partial": {"angleA_min": 48, "angleA_max": 52, "angleC_min": 48, "angleC_max": 52}
+            }
+        },
+        "hints": {
+            "attempt_1": "Isosceles triangles have two equal angles. You need A and C both around 50°. If A = C = 50°, what must B be?",
+            "attempt_2": "Calculate: If A = 50° and C = 50°, then B = 180° - 50° - 50° = 80°. Drag C to match this configuration.",
+            "attempt_3": "Try positioning C at around (340, 160) to create symmetry. Fine-tune position until both A and C are close to 50°."
+        },
+        "concept_reminder": "Isosceles triangles have two equal sides and two equal angles. The equal angles are opposite the equal sides. This creates beautiful symmetry and is very common in geometry!"
+    },
+    {
+        "id": "angle_sum_q5",
+        "challenge": "Make the triangle as 'flat' as possible! Create a very flat triangle where one angle is very small (less than 20°). How do the other angles change?",
+        "target_parameters": ["Cx", "Cy"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "angleA", "operator": "<=", "value": 20}
+            ],
+            "scoring": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"angleA_max": 15},
+                "partial": {"angleA_max": 20}
+            }
+        },
+        "hints": {
+            "attempt_1": "To make a flat triangle, drag C so that all three points are almost in a straight line. This makes one angle very small.",
+            "attempt_2": "Move C far to the right and align it horizontally with B. This will make angle A (red, at the top) very small.",
+            "attempt_3": "Try C at position (340, 250) - this makes C very far from A, creating a flat triangle with a tiny angle at A."
+        },
+        "concept_reminder": "When a triangle becomes very flat, one angle becomes very small (approaching 0°), and the other two angles become very large (approaching 180° total). This demonstrates how angles adjust to maintain the 180° sum no matter what!"
+    },
+    {
+        "id": "angle_sum_q6",
+        "challenge": "Advanced challenge! Create a triangle where all three angles are different but close to each other - get each angle between 55° and 65°. Can you balance them?",
+        "target_parameters": ["Cx", "Cy"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "angleA", "operator": ">=", "value": 55},
+                {"parameter": "angleA", "operator": "<=", "value": 65},
+                {"parameter": "angleB", "operator": ">=", "value": 55},
+                {"parameter": "angleB", "operator": "<=", "value": 65},
+                {"parameter": "angleC", "operator": ">=", "value": 55},
+                {"parameter": "angleC", "operator": "<=", "value": 65}
+            ],
+            "scoring": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"all_between_55_65": True},
+                "partial": {"all_between_50_70": True}
+            }
+        },
+        "hints": {
+            "attempt_1": "If all three angles are about equal (around 60° each), you'd have an equilateral triangle. Aim for angles close to 60°.",
+            "attempt_2": "The perfect equilateral triangle has all angles at exactly 60°. Position C to create a balanced triangle.",
+            "attempt_3": "Try C at around (260, 220) for a near-equilateral configuration where all angles are close to 60°."
+        },
+        "concept_reminder": "When all three angles are equal (60° each), you have an equilateral triangle - the most symmetric triangle. This happens when all three sides are also equal in length. It's the perfect balance!"
+    }
+]
     
     # ═══════════════════════════════════════════════════════════════════════
     # ANGLE SUM PROPERTY SIMULATION (in SIMULATIONS dict above)
@@ -787,6 +957,118 @@ What can be demonstrated:
             "description": "The parallel line proof shows that all three angles can be rearranged at one vertex to form a straight line (180°), proving the angle sum property.",
             "key_insight": "When you show the proof, angles B and C appear at vertex A as alternate angles, and together with angle A, they form a straight line",
             "related_params": ["show_proof_lines"]
+        }
+    ]
+}
+
+# ═══════════════════════════════════════════════════════════════════════
+# INTERACTIVE ANGLE SUM PROPERTY SIMULATION (New Version)
+# ═══════════════════════════════════════════════════════════════════════
+
+SIMULATIONS["angle_sum_interactive"] = {
+    "title": "Interactive Triangle Angles",
+    "file": "simulations/angle-sum-property.html",
+    "description": """
+A modern, touch-friendly interactive simulation where you drag point C to 
+reshape the triangle and observe in real-time how the three angles change 
+while their sum remains constant at 180°. Features live angle displays, 
+visual angle arcs, and instant feedback.
+
+What can be demonstrated:
+- Triangle interior angles always sum to 180°
+- Real-time angle measurement as you reshape the triangle
+- Visual representation of each angle with color-coded arcs
+- Angle sum property holds for all triangle types (acute, right, obtuse)
+- Interactive discovery of angle relationships
+""",
+    "cannot_demonstrate": [
+        "Exterior angles",
+        "Triangle inequality theorem",
+        "Side length relationships",
+        "Area calculations",
+        "Parallel line proof method"
+    ],
+    "initial_params": {
+        "Cx": 320,
+        "Cy": 250,
+        "Ax": 200,
+        "Ay": 60,
+        "Bx": 80,
+        "By": 250,
+        "autoInteract": False
+    },
+    "parameter_info": {
+        "Cx": {
+            "label": "Point C X Position",
+            "range": "60-340 units",
+            "url_key": "Cx",
+            "effect": "Horizontal position of the draggable point C (right corner)"
+        },
+        "Cy": {
+            "label": "Point C Y Position",
+            "range": "40-280 units",
+            "url_key": "Cy",
+            "effect": "Vertical position of the draggable point C (right corner)"
+        },
+        "Ax": {
+            "label": "Point A X Position",
+            "range": "50-350 units",
+            "url_key": "Ax",
+            "effect": "Horizontal position of point A (top vertex)"
+        },
+        "Ay": {
+            "label": "Point A Y Position",
+            "range": "40-280 units",
+            "url_key": "Ay",
+            "effect": "Vertical position of point A (top vertex)"
+        },
+        "Bx": {
+            "label": "Point B X Position",
+            "range": "50-350 units",
+            "url_key": "Bx",
+            "effect": "Horizontal position of point B (left corner)"
+        },
+        "By": {
+            "label": "Point B Y Position",
+            "range": "40-280 units",
+            "url_key": "By",
+            "effect": "Vertical position of point B (left corner)"
+        },
+        "autoInteract": {
+            "label": "Auto Show Discovery",
+            "range": "true/false",
+            "url_key": "autoInteract",
+            "effect": "If true, shows the discovery message immediately without requiring interaction"
+        }
+    },
+    "concepts": [
+        {
+            "id": 1,
+            "title": "Triangle Angle Sum is Always 180°",
+            "description": "The fundamental property that the three interior angles of any triangle always sum to exactly 180 degrees, regardless of the triangle's shape or size.",
+            "key_insight": "No matter how you reshape the triangle by dragging point C, angle A + angle B + angle C = 180° always",
+            "related_params": ["Cx", "Cy", "Ax", "Ay", "Bx", "By"]
+        },
+        {
+            "id": 2,
+            "title": "Finding Unknown Angles",
+            "description": "If you know any two angles in a triangle, you can always find the third angle by subtracting their sum from 180 degrees.",
+            "key_insight": "Third angle = 180° - (first angle + second angle). This works for ALL triangles!",
+            "related_params": ["Cx", "Cy"]
+        },
+        {
+            "id": 3,
+            "title": "Triangle Types and Angles",
+            "description": "Triangles can be classified by their angles: acute (all angles < 90°), right (one angle = 90°), obtuse (one angle > 90°), but they all follow the 180° rule.",
+            "key_insight": "Move point C to create different triangle types - notice how the angles adjust to maintain the 180° sum",
+            "related_params": ["Cx", "Cy"]
+        },
+        {
+            "id": 4,
+            "title": "Angle Measurement and Visualization",
+            "description": "Understanding how angles are measured at each vertex and how they relate to the triangle's overall shape.",
+            "key_insight": "Each colored arc shows the angle at that vertex - red for A, blue for B, green for C",
+            "related_params": ["Cx", "Cy", "Ax", "Ay", "Bx", "By"]
         }
     ]
 }

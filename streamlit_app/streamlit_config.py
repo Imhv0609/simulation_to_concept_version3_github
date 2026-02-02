@@ -227,6 +227,80 @@ SIMULATIONS = {
         ],
         "auto_start_param": None,
         "topic": "Parallel Lines & Transversal"
+    },
+    
+    "angle_sum_interactive": {
+        "name": "Interactive Triangle Angles",
+        "description": "Drag point C to reshape triangle and see angles sum to 180°",
+        "base_url": f"{GITHUB_PAGES_BASE}/angle-sum-property.html",
+        "parameters": [
+            {
+                "name": "Cx",
+                "display_name": "Point C - Horizontal",
+                "default": 320,
+                "min": 60,
+                "max": 340,
+                "unit": "units",
+                "url_param": "Cx"
+            },
+            {
+                "name": "Cy",
+                "display_name": "Point C - Vertical",
+                "default": 250,
+                "min": 40,
+                "max": 280,
+                "unit": "units",
+                "url_param": "Cy"
+            },
+            {
+                "name": "Ax",
+                "display_name": "Point A - Horizontal",
+                "default": 200,
+                "min": 50,
+                "max": 350,
+                "unit": "units",
+                "url_param": "Ax"
+            },
+            {
+                "name": "Ay",
+                "display_name": "Point A - Vertical",
+                "default": 60,
+                "min": 40,
+                "max": 280,
+                "unit": "units",
+                "url_param": "Ay"
+            },
+            {
+                "name": "Bx",
+                "display_name": "Point B - Horizontal",
+                "default": 80,
+                "min": 50,
+                "max": 350,
+                "unit": "units",
+                "url_param": "Bx"
+            },
+            {
+                "name": "By",
+                "display_name": "Point B - Vertical",
+                "default": 250,
+                "min": 40,
+                "max": 280,
+                "unit": "units",
+                "url_param": "By"
+            },
+            {
+                "name": "autoInteract",
+                "display_name": "Show Discovery Message",
+                "default": False,
+                "min": None,
+                "max": None,
+                "unit": "",
+                "url_param": "autoInteract",
+                "options": [True, False]
+            }
+        ],
+        "auto_start_param": None,
+        "topic": "Interactive Triangle Angles"
     }
 }
 
