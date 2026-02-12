@@ -296,6 +296,94 @@ alternate interior angles are equal, and co-interior angles sum to 180°.
     }
 }
 
+# =============================================================================
+# SPEED RACE SIMULATION
+# =============================================================================
+SIMULATIONS["speed_race"] = {
+    "title": "Speed, Distance & Time Race",
+    "file": "simulations/simulation_7_speed_race.html",
+    "description": """
+An interactive race simulation where four different modes of transport (walker, cyclist, car, train) 
+compete to travel 1 kilometer. Students can adjust the speed of each racer to understand the 
+relationship between speed, distance, and time.
+
+What can be demonstrated:
+- Relationship between speed and time for fixed distance (Time = Distance ÷ Speed)
+- Comparing different speeds and their effects on travel time
+- Real-world speed concepts with familiar modes of transport
+- How increasing speed decreases time for the same distance
+- Mathematical calculation: Time = Distance ÷ Speed
+""",
+        "cannot_demonstrate": [
+            "Acceleration or changing speeds during race",
+            "Different distances for different racers",
+            "Energy consumption or fuel efficiency",
+            "Traffic conditions or obstacles"
+        ],
+        "initial_params": {
+            "speedWalker": 5,
+            "speedCyclist": 20,
+            "speedCar": 60,
+            "speedTrain": 100
+        },
+        "parameter_info": {
+            "speedWalker": {
+                "label": "Walker Speed",
+                "range": "1-10 km/h",
+                "url_key": "speedWalker",
+                "effect": "Controls how fast the walker moves (typical walking speed: 5 km/h)"
+            },
+            "speedCyclist": {
+                "label": "Cyclist Speed",
+                "range": "5-40 km/h",
+                "url_key": "speedCyclist",
+                "effect": "Controls how fast the cyclist moves (typical cycling speed: 20 km/h)"
+            },
+            "speedCar": {
+                "label": "Car Speed",
+                "range": "20-120 km/h",
+                "url_key": "speedCar",
+                "effect": "Controls how fast the car moves (typical city car speed: 60 km/h)"
+            },
+            "speedTrain": {
+                "label": "Train Speed",
+                "range": "50-200 km/h",
+                "url_key": "speedTrain",
+                "effect": "Controls how fast the train moves (typical train speed: 100 km/h)"
+            }
+        },
+        "concepts": [
+            {
+                "id": 1,
+                "title": "Speed and Time Relationship",
+                "description": "Understanding how speed affects the time taken to cover a fixed distance.",
+                "key_insight": "Higher speed means less time to cover the same distance. Time = Distance ÷ Speed",
+                "related_params": ["speedWalker", "speedCyclist", "speedCar", "speedTrain"]
+            },
+            {
+                "id": 2,
+                "title": "Calculating Travel Time",
+                "description": "Learning to calculate time when distance and speed are known.",
+                "key_insight": "For 1 km at 5 km/h: Time = 1 ÷ 5 = 0.2 hours = 12 minutes. Double the speed, halve the time!",
+                "related_params": ["speedWalker", "speedCyclist", "speedCar", "speedTrain"]
+            },
+            {
+                "id": 3,
+                "title": "Comparing Different Speeds",
+                "description": "Comparing how different speeds affect arrival times in a race scenario.",
+                "key_insight": "The racer with the highest speed finishes first. A train at 100 km/h is 20 times faster than a walker at 5 km/h",
+                "related_params": ["speedWalker", "speedCyclist", "speedCar", "speedTrain"]
+            },
+            {
+                "id": 4,
+                "title": "Real-World Speed Context",
+                "description": "Understanding typical speeds of different modes of transport in everyday life.",
+                "key_insight": "Walking ≈ 5 km/h, Cycling ≈ 20 km/h, Car ≈ 60 km/h, Train ≈ 100 km/h - each is progressively faster",
+                "related_params": ["speedWalker", "speedCyclist", "speedCar", "speedTrain"]
+            }
+        ]
+}
+
 # ═══════════════════════════════════════════════════════════════════════
 # HELPER FUNCTIONS
 # ═══════════════════════════════════════════════════════════════════════
@@ -696,8 +784,8 @@ QUIZ_QUESTIONS = {
 QUIZ_QUESTIONS["angle_sum_interactive"] = [
     {
         "id": "angle_sum_q1",
-        "challenge": "Create a right triangle! Position point C so that angle B (blue) becomes exactly 90 degrees. Remember: the angles must still sum to 180°!",
-        "target_parameters": ["Cx", "Cy"],
+        "challenge": "Create a right triangle! Set angle B (blue) to exactly 90 degrees. Remember: the angles must still sum to 180°!",
+        "target_parameters": ["angleB"],
         "success_rule": {
             "conditions": [
                 {"parameter": "angleB", "operator": ">=", "value": 88},
@@ -714,16 +802,16 @@ QUIZ_QUESTIONS["angle_sum_interactive"] = [
             }
         },
         "hints": {
-            "attempt_1": "To make a right angle (90°) at point B, drag point C so that the blue angle becomes 90°. Watch the blue angle value!",
-            "attempt_2": "Move point C vertically or horizontally relative to point B. A right angle at B means the two sides meeting at B are perpendicular.",
-            "attempt_3": "Try moving C to position (80, 160) - this should create a right angle at B. Adjust slightly if needed to get exactly 90°."
+            "attempt_1": "To make a right angle (90°) at point B, change angle B to 90°. A right triangle has one 90° angle!",
+            "attempt_2": "Set angle B = 90. The other two angles will automatically adjust to maintain the 180° sum.",
+            "attempt_3": "Try setting angle B to exactly 90 degrees. You can also adjust angles A or C, and B will recalculate."
         },
         "concept_reminder": "A right triangle has one angle equal to 90 degrees. The other two angles must be acute and add up to 90° (since all three must sum to 180°). This creates special angle relationships useful in trigonometry!"
     },
     {
         "id": "angle_sum_q2",
-        "challenge": "If angle A is 45° and angle C is 65°, what should angle B be? Calculate it first, then adjust point C to create these angles. Check your mental math!",
-        "target_parameters": ["Cx", "Cy"],
+        "challenge": "If angle A is 45° and angle C is 65°, what should angle B be? Calculate it first, then set the angles to create this triangle. Check your mental math!",
+        "target_parameters": ["angleA", "angleC"],
         "success_rule": {
             "conditions": [
                 {"parameter": "angleA", "operator": ">=", "value": 43},
@@ -743,15 +831,15 @@ QUIZ_QUESTIONS["angle_sum_interactive"] = [
         },
         "hints": {
             "attempt_1": "First, calculate: If A = 45° and C = 65°, then B = 180° - 45° - 65° = ?",
-            "attempt_2": "The answer is B = 70°. Now drag point C and watch all three angle values until A ≈ 45°, B ≈ 70°, and C ≈ 65°.",
-            "attempt_3": "Try positioning C at approximately (270, 250) and fine-tune from there. Watch the live angle displays!"
+            "attempt_2": "The answer is B = 70°. Now set angle A = 45° and angle C = 65°. Angle B will automatically become 70°!",
+            "attempt_3": "Set angleA to 45 degrees and angleC to 65 degrees. Watch angle B update to 70° automatically."
         },
         "concept_reminder": "To find an unknown angle in a triangle: subtract the two known angles from 180°. This is one of the most useful applications of the angle sum property in geometry problems!"
     },
     {
         "id": "angle_sum_q3",
-        "challenge": "Create an obtuse triangle! An obtuse triangle has ONE angle greater than 90°. Make angle C (green) the obtuse angle - aim for around 120°.",
-        "target_parameters": ["Cx", "Cy"],
+        "challenge": "Create an obtuse triangle! An obtuse triangle has ONE angle greater than 90°. Make angle C (green) the obtuse angle - set it to around 120°.",
+        "target_parameters": ["angleC"],
         "success_rule": {
             "conditions": [
                 {"parameter": "angleC", "operator": ">=", "value": 115},
@@ -768,16 +856,16 @@ QUIZ_QUESTIONS["angle_sum_interactive"] = [
             }
         },
         "hints": {
-            "attempt_1": "An obtuse angle is greater than 90°. Drag point C to make the green angle (angle C) larger than 90°.",
-            "attempt_2": "Move point C closer to the line between A and B (but not too close). This will increase angle C.",
-            "attempt_3": "Try positioning C at around (200, 230) to make angle C obtuse. Adjust until it's about 120°."
+            "attempt_1": "An obtuse angle is greater than 90°. Set angle C to a value larger than 90°, like 120°.",
+            "attempt_2": "Try setting angle C = 120. Watch how angles A and B automatically adjust to keep the sum at 180°.",
+            "attempt_3": "Set angleC to 120 degrees. The triangle will reshape to show an obtuse angle at vertex C."
         },
         "concept_reminder": "An obtuse triangle has one angle > 90° (obtuse) and two angles < 90° (acute). The two acute angles must be small enough that all three still sum to 180°. Notice how the other angles get smaller as C becomes larger!"
     },
     {
         "id": "angle_sum_q4",
         "challenge": "Create an isosceles triangle where two angles are equal! Make angles A and C both approximately 50°. What will angle B be?",
-        "target_parameters": ["Cx", "Cy"],
+        "target_parameters": ["angleA", "angleC"],
         "success_rule": {
             "conditions": [
                 {"parameter": "angleA", "operator": ">=", "value": 48},
@@ -797,15 +885,15 @@ QUIZ_QUESTIONS["angle_sum_interactive"] = [
         },
         "hints": {
             "attempt_1": "Isosceles triangles have two equal angles. You need A and C both around 50°. If A = C = 50°, what must B be?",
-            "attempt_2": "Calculate: If A = 50° and C = 50°, then B = 180° - 50° - 50° = 80°. Drag C to match this configuration.",
-            "attempt_3": "Try positioning C at around (340, 160) to create symmetry. Fine-tune position until both A and C are close to 50°."
+            "attempt_2": "Calculate: If A = 50° and C = 50°, then B = 180° - 50° - 50° = 80°. Set angleA = 50 and angleC = 50.",
+            "attempt_3": "Set angleA to 50 degrees and angleC to 50 degrees. Watch angle B automatically become 80°!"
         },
         "concept_reminder": "Isosceles triangles have two equal sides and two equal angles. The equal angles are opposite the equal sides. This creates beautiful symmetry and is very common in geometry!"
     },
     {
         "id": "angle_sum_q5",
         "challenge": "Make the triangle as 'flat' as possible! Create a very flat triangle where one angle is very small (less than 20°). How do the other angles change?",
-        "target_parameters": ["Cx", "Cy"],
+        "target_parameters": ["angleA"],
         "success_rule": {
             "conditions": [
                 {"parameter": "angleA", "operator": "<=", "value": 20}
@@ -821,16 +909,16 @@ QUIZ_QUESTIONS["angle_sum_interactive"] = [
             }
         },
         "hints": {
-            "attempt_1": "To make a flat triangle, drag C so that all three points are almost in a straight line. This makes one angle very small.",
-            "attempt_2": "Move C far to the right and align it horizontally with B. This will make angle A (red, at the top) very small.",
-            "attempt_3": "Try C at position (340, 250) - this makes C very far from A, creating a flat triangle with a tiny angle at A."
+            "attempt_1": "To make a flat triangle, set angle A to a very small value like 15°. Watch how angles B and C adjust!",
+            "attempt_2": "Try setting angle A to 10 degrees. The other two angles will become very large to maintain the 180° sum.",
+            "attempt_3": "Set angleA to a value between 10-15 degrees. This creates a flat triangle with a tiny angle at vertex A."
         },
         "concept_reminder": "When a triangle becomes very flat, one angle becomes very small (approaching 0°), and the other two angles become very large (approaching 180° total). This demonstrates how angles adjust to maintain the 180° sum no matter what!"
     },
     {
         "id": "angle_sum_q6",
         "challenge": "Advanced challenge! Create a triangle where all three angles are different but close to each other - get each angle between 55° and 65°. Can you balance them?",
-        "target_parameters": ["Cx", "Cy"],
+        "target_parameters": ["angleA", "angleB"],
         "success_rule": {
             "conditions": [
                 {"parameter": "angleA", "operator": ">=", "value": 55},
@@ -852,10 +940,124 @@ QUIZ_QUESTIONS["angle_sum_interactive"] = [
         },
         "hints": {
             "attempt_1": "If all three angles are about equal (around 60° each), you'd have an equilateral triangle. Aim for angles close to 60°.",
-            "attempt_2": "The perfect equilateral triangle has all angles at exactly 60°. Position C to create a balanced triangle.",
-            "attempt_3": "Try C at around (260, 220) for a near-equilateral configuration where all angles are close to 60°."
+            "attempt_2": "Try setting angle A = 60° and angle B = 60°. Angle C will automatically become 60° too!",
+            "attempt_3": "Set angleA to 60 and angleB to 60 for a perfect equilateral triangle where all angles equal 60°."
         },
         "concept_reminder": "When all three angles are equal (60° each), you have an equilateral triangle - the most symmetric triangle. This happens when all three sides are also equal in length. It's the perfect balance!"
+    }
+]
+
+QUIZ_QUESTIONS["speed_race"] = [
+    {
+        "id": "speed_q1",
+        "challenge": "Make the cyclist finish the 1 km race in exactly 3 minutes (180 seconds). What speed should the cyclist have?",
+        "target_parameters": ["speedCyclist"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "speedCyclist", "operator": ">=", "value": 19},
+                {"parameter": "speedCyclist", "operator": "<=", "value": 21}
+            ],
+            "scoring": {
+                "perfect": 1.0,
+                "partial": 0.5,
+                "wrong": 0.2
+            },
+            "thresholds": {
+                "perfect": {"speedCyclist_min": 19.5, "speedCyclist_max": 20.5},
+                "partial": {"speedCyclist_min": 18, "speedCyclist_max": 22}
+            }
+        },
+        "hints": {
+            "attempt_1": "Think about the formula: Time = Distance ÷ Speed, so Speed = Distance ÷ Time. Distance is 1 km, time is 3 minutes = 0.05 hours.",
+            "attempt_2": "Convert 3 minutes to hours: 3/60 = 0.05 hours. Then Speed = 1 km ÷ 0.05 hours = 20 km/h.",
+            "attempt_3": "Set speedCyclist to 20 km/h. At this speed, the cyclist covers 1 km in exactly 3 minutes (180 seconds)."
+        },
+        "concept_reminder": "To find speed when you know distance and time: Speed = Distance ÷ Time. Remember to keep units consistent - if distance is in km and time in hours, speed will be in km/h. 3 minutes = 0.05 hours, so 1 km ÷ 0.05 hours = 20 km/h."
+    },
+    {
+        "id": "speed_q2",
+        "challenge": "Set the speeds so that the car finishes exactly twice as fast as the cyclist. If the cyclist is at 20 km/h, what should the car's speed be?",
+        "target_parameters": ["speedCyclist", "speedCar"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "speedCyclist", "operator": ">=", "value": 18},
+                {"parameter": "speedCyclist", "operator": "<=", "value": 22},
+                {"parameter": "speedCar", "operator": ">=", "value": 36},
+                {"parameter": "speedCar", "operator": "<=", "value": 44}
+            ],
+            "scoring": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"speedCyclist_min": 19, "speedCyclist_max": 21, "speedCar_min": 38, "speedCar_max": 42},
+                "partial": {"speedCyclist_min": 18, "speedCyclist_max": 22, "speedCar_min": 35, "speedCar_max": 45}
+            }
+        },
+        "hints": {
+            "attempt_1": "If the car finishes twice as fast, it takes half the time. To take half the time for the same distance, the car must go twice as fast.",
+            "attempt_2": "Twice as fast means double the speed. If cyclist = 20 km/h, then car = 2 × 20 = 40 km/h.",
+            "attempt_3": "Set speedCyclist to 20 and speedCar to 40. The car's speed is double, so it finishes in half the time!"
+        },
+        "concept_reminder": "When speed doubles, time halves (for the same distance). If you want to finish twice as fast, you need to go twice as fast. This inverse relationship is key: Time = Distance ÷ Speed."
+    },
+    {
+        "id": "speed_q3",
+        "challenge": "Make all four racers finish within a 10-second window of each other. Set their speeds close enough so the race is very tight!",
+        "target_parameters": ["speedWalker", "speedCyclist", "speedCar", "speedTrain"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "speedWalker", "operator": ">=", "value": 95},
+                {"parameter": "speedWalker", "operator": "<=", "value": 105},
+                {"parameter": "speedCyclist", "operator": ">=", "value": 95},
+                {"parameter": "speedCyclist", "operator": "<=", "value": 105},
+                {"parameter": "speedCar", "operator": ">=", "value": 95},
+                {"parameter": "speedCar", "operator": "<=", "value": 105},
+                {"parameter": "speedTrain", "operator": ">=", "value": 95},
+                {"parameter": "speedTrain", "operator": "<=", "value": 105}
+            ],
+            "scoring": {
+                "perfect": 1.0,
+                "partial": 0.5,
+                "wrong": 0.2
+            },
+            "thresholds": {
+                "perfect": {"all_between_98_102": True},
+                "partial": {"all_between_95_105": True}
+            }
+        },
+        "hints": {
+            "attempt_1": "For a very close race, all speeds should be nearly equal. Try setting all four speeds to similar values around 100 km/h.",
+            "attempt_2": "Set all speeds close to 100 km/h - perhaps 98, 99, 100, and 101. Small speed differences = small time differences!",
+            "attempt_3": "Set speedWalker=98, speedCyclist=99, speedCar=100, speedTrain=101. All speeds are within 3 km/h, making for a very tight race!"
+        },
+        "concept_reminder": "When speeds are close, finish times are close! Small differences in speed create small differences in time. At 100 km/h, 1 km takes 36 seconds. At 99 km/h, it takes 36.4 seconds - only 0.4 seconds difference!"
+    },
+    {
+        "id": "speed_q4",
+        "challenge": "Make the walker finish the 1 km race in under 6 minutes. What's the minimum speed needed?",
+        "target_parameters": ["speedWalker"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "speedWalker", "operator": ">=", "value": 10}
+            ],
+            "scoring": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"speedWalker_min": 10},
+                "partial": {"speedWalker_min": 9.5}
+            }
+        },
+        "hints": {
+            "attempt_1": "6 minutes = 0.1 hours. To cover 1 km in 0.1 hours, the speed must be at least 1 km ÷ 0.1 hours = 10 km/h.",
+            "attempt_2": "The walker needs to go at least 10 km/h to finish in 6 minutes or less. Try setting speedWalker to 10.",
+            "attempt_3": "Set speedWalker to 10 km/h. At this speed, the walker covers 1 km in exactly 6 minutes (360 seconds)."
+        },
+        "concept_reminder": "To find the minimum speed needed for a certain time: Speed = Distance ÷ Time. For 1 km in 6 minutes (0.1 hours), speed must be at least 1 ÷ 0.1 = 10 km/h. Faster speeds mean even shorter times!"
     }
 ]
     
@@ -989,50 +1191,29 @@ What can be demonstrated:
         "Parallel line proof method"
     ],
     "initial_params": {
-        "Cx": 320,
-        "Cy": 250,
-        "Ax": 200,
-        "Ay": 60,
-        "Bx": 80,
-        "By": 250,
+        "angleA": 60,
+        "angleB": 60,
+        "angleC": 60,
         "autoInteract": False
     },
     "parameter_info": {
-        "Cx": {
-            "label": "Point C X Position",
-            "range": "60-340 units",
-            "url_key": "Cx",
-            "effect": "Horizontal position of the draggable point C (right corner)"
+        "angleA": {
+            "label": "Angle A",
+            "range": "10-170 degrees",
+            "url_key": "angleA",
+            "effect": "The angle at vertex A (top vertex, shown in red). Adjusting this reshapes the triangle while maintaining the 180° sum."
         },
-        "Cy": {
-            "label": "Point C Y Position",
-            "range": "40-280 units",
-            "url_key": "Cy",
-            "effect": "Vertical position of the draggable point C (right corner)"
+        "angleB": {
+            "label": "Angle B",
+            "range": "10-170 degrees",
+            "url_key": "angleB",
+            "effect": "The angle at vertex B (left vertex, shown in blue). Adjusting this reshapes the triangle while maintaining the 180° sum."
         },
-        "Ax": {
-            "label": "Point A X Position",
-            "range": "50-350 units",
-            "url_key": "Ax",
-            "effect": "Horizontal position of point A (top vertex)"
-        },
-        "Ay": {
-            "label": "Point A Y Position",
-            "range": "40-280 units",
-            "url_key": "Ay",
-            "effect": "Vertical position of point A (top vertex)"
-        },
-        "Bx": {
-            "label": "Point B X Position",
-            "range": "50-350 units",
-            "url_key": "Bx",
-            "effect": "Horizontal position of point B (left corner)"
-        },
-        "By": {
-            "label": "Point B Y Position",
-            "range": "40-280 units",
-            "url_key": "By",
-            "effect": "Vertical position of point B (left corner)"
+        "angleC": {
+            "label": "Angle C",
+            "range": "10-170 degrees",
+            "url_key": "angleC",
+            "effect": "The angle at vertex C (draggable vertex, shown in green). This is automatically calculated to ensure angles sum to 180°."
         },
         "autoInteract": {
             "label": "Auto Show Discovery",
@@ -1046,29 +1227,29 @@ What can be demonstrated:
             "id": 1,
             "title": "Triangle Angle Sum is Always 180°",
             "description": "The fundamental property that the three interior angles of any triangle always sum to exactly 180 degrees, regardless of the triangle's shape or size.",
-            "key_insight": "No matter how you reshape the triangle by dragging point C, angle A + angle B + angle C = 180° always",
-            "related_params": ["Cx", "Cy", "Ax", "Ay", "Bx", "By"]
+            "key_insight": "No matter how you change the angles, angle A + angle B + angle C = 180° always",
+            "related_params": ["angleA", "angleB", "angleC"]
         },
         {
             "id": 2,
             "title": "Finding Unknown Angles",
             "description": "If you know any two angles in a triangle, you can always find the third angle by subtracting their sum from 180 degrees.",
             "key_insight": "Third angle = 180° - (first angle + second angle). This works for ALL triangles!",
-            "related_params": ["Cx", "Cy"]
+            "related_params": ["angleA", "angleB", "angleC"]
         },
         {
             "id": 3,
             "title": "Triangle Types and Angles",
             "description": "Triangles can be classified by their angles: acute (all angles < 90°), right (one angle = 90°), obtuse (one angle > 90°), but they all follow the 180° rule.",
-            "key_insight": "Move point C to create different triangle types - notice how the angles adjust to maintain the 180° sum",
-            "related_params": ["Cx", "Cy"]
+            "key_insight": "Change the angles to create different triangle types - notice how they adjust to maintain the 180° sum",
+            "related_params": ["angleA", "angleB", "angleC"]
         },
         {
             "id": 4,
             "title": "Angle Measurement and Visualization",
             "description": "Understanding how angles are measured at each vertex and how they relate to the triangle's overall shape.",
             "key_insight": "Each colored arc shows the angle at that vertex - red for A, blue for B, green for C",
-            "related_params": ["Cx", "Cy", "Ax", "Ay", "Bx", "By"]
+            "related_params": ["angleA", "angleB", "angleC"]
         }
     ]
 }

@@ -21,16 +21,28 @@ from langchain_core.messages import HumanMessage
 
 from config import (
     GOOGLE_API_KEY, GEMINI_MODEL, TEMPERATURE, INITIAL_PARAMS,
-    TOPIC_TITLE, TOPIC_DESCRIPTION, PARAMETER_INFO
+    TOPIC_TITLE, TOPIC_DESCRIPTION, PARAMETER_INFO, USE_API_TRACKER,
+    get_best_api_key_for_model, track_model_call
 )
 from state import add_message_to_history
 
 
 def get_llm():
-    """Get configured LLM instance."""
+    """Get configured LLM instance with API tracking."""
+    if USE_API_TRACKER:
+        try:
+            # Get best API key for this model from tracker
+            api_key = get_best_api_key_for_model(GEMINI_MODEL)
+            print(f"[EVALUATOR] Using tracked API key ...{api_key[-6:]} for {GEMINI_MODEL}")
+        except Exception as e:
+            print(f"[EVALUATOR] Tracker error: {e}, falling back to GOOGLE_API_KEY")
+            api_key = GOOGLE_API_KEY
+    else:
+        api_key = GOOGLE_API_KEY
+    
     return ChatGoogleGenerativeAI(
         model=GEMINI_MODEL,
-        google_api_key=GOOGLE_API_KEY,
+        google_api_key=api_key,
         temperature=0.3  # Lower temperature for more consistent evaluation
     )
 
@@ -250,7 +262,24 @@ RESPOND WITH ONLY THIS JSON:
         print(f"   🔎 DEBUG - No param_history available!")
     
     llm = get_llm()
+    
+    # Get the API key that was used (for tracking)
+    used_api_key = None
+    if USE_API_TRACKER:
+        try:
+            used_api_key = get_best_api_key_for_model(GEMINI_MODEL)
+        except:
+            pass
+    
     response = llm.invoke([HumanMessage(content=eval_prompt)])
+    
+    # Track the API call
+    if USE_API_TRACKER and used_api_key:
+        try:
+            track_model_call(used_api_key, GEMINI_MODEL)
+            print(f"[EVALUATOR] Tracked API call: ...{used_api_key[-6:]} + {GEMINI_MODEL}")
+        except Exception as e:
+            print(f"[EVALUATOR] Warning: Failed to track API call: {e}")
     
     result = parse_json_safe(response.content)
     

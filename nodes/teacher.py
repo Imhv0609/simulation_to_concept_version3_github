@@ -24,19 +24,32 @@ from datetime import datetime
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.runnables import RunnableConfig
 
 from config import (
     GOOGLE_API_KEY, GEMINI_MODEL, TEMPERATURE, CANNOT_DEMONSTRATE, 
-    PARAMETER_INFO, TOPIC_TITLE, TOPIC_DESCRIPTION
+    PARAMETER_INFO, TOPIC_TITLE, TOPIC_DESCRIPTION, USE_API_TRACKER,
+    get_best_api_key_for_model, track_model_call
 )
 from state import add_message_to_history
 
 
 def get_llm():
-    """Get configured LLM instance."""
+    """Get configured LLM instance with API tracking."""
+    if USE_API_TRACKER:
+        try:
+            # Get best API key for this model from tracker
+            api_key = get_best_api_key_for_model(GEMINI_MODEL)
+            print(f"[TEACHER] Using tracked API key ...{api_key[-6:]} for {GEMINI_MODEL}")
+        except Exception as e:
+            print(f"[TEACHER] Tracker error: {e}, falling back to GOOGLE_API_KEY")
+            api_key = GOOGLE_API_KEY
+    else:
+        api_key = GOOGLE_API_KEY
+    
     return ChatGoogleGenerativeAI(
         model=GEMINI_MODEL,
-        google_api_key=GOOGLE_API_KEY,
+        google_api_key=api_key,
         temperature=TEMPERATURE
     )
 
@@ -46,23 +59,53 @@ def is_gemma_model() -> bool:
     return "gemma" in GEMINI_MODEL.lower()
 
 
-def invoke_llm_with_prompts(llm, system_prompt: str, user_prompt: str):
+def invoke_llm_with_prompts(llm, system_prompt: str, user_prompt: str, api_key: str = None, metadata: dict = None, parent_config: dict = None):
     """
-    Invoke LLM with model-aware message handling.
+    Invoke LLM with model-aware message handling, API tracking, and LangSmith metadata.
     
     Gemma models don't support SystemMessage, so we combine prompts.
     Gemini models support SystemMessage for better results.
+    
+    Args:
+        parent_config: The RunnableConfig from LangGraph node. Must be passed to preserve
+                       tracing callbacks so LangSmith can capture metadata.
     """
+    import langsmith
+    
+    # Build messages based on model type
     if is_gemma_model():
-        # Combine system and user prompt for Gemma
         combined_prompt = f"{system_prompt}\n\n---\n\nNow respond to this:\n\n{user_prompt}"
-        return llm.invoke([HumanMessage(content=combined_prompt)])
+        messages = [HumanMessage(content=combined_prompt)]
     else:
-        # Use proper system message for Gemini
-        return llm.invoke([
+        messages = [
             SystemMessage(content=system_prompt),
             HumanMessage(content=user_prompt)
-        ])
+        ]
+    
+    # Use langsmith.trace() to create a visible span with our custom metadata.
+    # This ensures metadata (simulation_url, etc.) appears in LangSmith UI
+    # as a child span under the node, with all metadata fields visible.
+    trace_metadata = metadata or {}
+    with langsmith.trace(
+        name="teacher_llm_call",
+        run_type="llm",
+        metadata=trace_metadata,
+        inputs={"system_prompt_length": len(system_prompt), "user_prompt_length": len(user_prompt)},
+    ) as rt:
+        # Also pass parent config to llm.invoke for callback chain continuity
+        config = parent_config or {}
+        response = llm.invoke(messages, config=config)
+        rt.outputs = {"response_length": len(response.content) if response.content else 0}
+    
+    # Track the API call if tracker is enabled
+    if USE_API_TRACKER and api_key:
+        try:
+            track_model_call(api_key, GEMINI_MODEL)
+            print(f"[TEACHER] Tracked API call: ...{api_key[-6:]} + {GEMINI_MODEL}")
+        except Exception as e:
+            print(f"[TEACHER] Warning: Failed to track API call: {e}")
+    
+    return response
 
 
 def parse_json_safe(text: str) -> dict:
@@ -119,7 +162,7 @@ def format_conversation_history(history: list, last_n: int = 6) -> str:
     return "\n".join(formatted)
 
 
-def teacher_node(state: Dict[str, Any]) -> Dict[str, Any]:
+def teacher_node(state: Dict[str, Any], config: RunnableConfig) -> Dict[str, Any]:
     """
     Generate a natural, adaptive teacher response.
     
@@ -133,6 +176,9 @@ def teacher_node(state: Dict[str, Any]) -> Dict[str, Any]:
         - strategy: What teaching strategy to use
         - teacher_mode: encouraging/challenging/simplifying
         - exchange_count: How many exchanges for this concept
+    
+    Args:
+        config: RunnableConfig from LangGraph with tracing callbacks for LangSmith.
         
     Output State:
         - last_teacher_message: The generated response
@@ -534,8 +580,67 @@ REMEMBER: Output ONLY the JSON object. Start your response with {{ and end with 
 
     llm = get_llm()
     
+    # Get the API key that was used (for tracking)
+    used_api_key = None
+    if USE_API_TRACKER:
+        try:
+            used_api_key = get_best_api_key_for_model(GEMINI_MODEL)
+        except:
+            pass
+    
+    # Build simulation URL for LangSmith metadata
+    from simulations_config import get_simulation
+    import os
+    simulation_id = os.environ.get("SIMULATION_ID", "simple_pendulum")
+    sim_config = get_simulation(simulation_id)
+    
+    # Build URL with current parameters
+    base_url = sim_config.get("file", "")
+    github_pages_base = os.environ.get("GITHUB_PAGES_BASE_URL", "")
+    if github_pages_base:
+        # Keep the full path including simulations/ directory
+        simulation_url = f"{github_pages_base}/{base_url}"
+    else:
+        simulation_url = base_url
+    
+    # Add parameters to URL
+    param_parts = []
+    for key, value in current_params.items():
+        if value is not None:
+            param_parts.append(f"{key}={value}")
+    
+    if param_parts:
+        simulation_url += "?" + "&".join(param_parts)
+    
+    # Prepare LangSmith metadata
+    langsmith_metadata = {
+        "simulation_url": simulation_url,
+        "simulation_id": simulation_id,
+        "concept": current_concept['title'],
+        "understanding_level": understanding,
+        "strategy": strategy,
+        "teacher_mode": teacher_mode,
+        "exchange_count": exchange_count,
+        "parameters": json.dumps(current_params)
+    }
+    
+    print(f"[TEACHER] 📊 LangSmith metadata: simulation_url={simulation_url}")
+    print(f"[TEACHER] 📊 LangSmith metadata: simulation_id={simulation_id}")
+    
+    # Also try to update the current node run's metadata directly
+    try:
+        from langsmith import get_current_run_tree
+        rt = get_current_run_tree()
+        if rt:
+            rt.metadata = {**(rt.metadata or {}), **langsmith_metadata}
+            print(f"[TEACHER] ✅ Updated current run tree metadata")
+        else:
+            print(f"[TEACHER] ℹ️ No current run tree (metadata will be on child span)")
+    except Exception as e:
+        print(f"[TEACHER] ⚠️ Run tree update: {e}")
+    
     # Use model-aware invocation (handles both Gemma and Gemini)
-    response = invoke_llm_with_prompts(llm, system_prompt, user_prompt)
+    response = invoke_llm_with_prompts(llm, system_prompt, user_prompt, api_key=used_api_key, metadata=langsmith_metadata, parent_config=config)
     
     try:
         result = parse_json_safe(response.content)

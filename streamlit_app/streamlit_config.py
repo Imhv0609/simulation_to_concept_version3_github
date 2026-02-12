@@ -231,62 +231,35 @@ SIMULATIONS = {
     
     "angle_sum_interactive": {
         "name": "Interactive Triangle Angles",
-        "description": "Drag point C to reshape triangle and see angles sum to 180°",
+        "description": "Adjust angles to reshape triangle and see they always sum to 180°",
         "base_url": f"{GITHUB_PAGES_BASE}/angle-sum-property.html",
         "parameters": [
             {
-                "name": "Cx",
-                "display_name": "Point C - Horizontal",
-                "default": 320,
-                "min": 60,
-                "max": 340,
-                "unit": "units",
-                "url_param": "Cx"
-            },
-            {
-                "name": "Cy",
-                "display_name": "Point C - Vertical",
-                "default": 250,
-                "min": 40,
-                "max": 280,
-                "unit": "units",
-                "url_param": "Cy"
-            },
-            {
-                "name": "Ax",
-                "display_name": "Point A - Horizontal",
-                "default": 200,
-                "min": 50,
-                "max": 350,
-                "unit": "units",
-                "url_param": "Ax"
-            },
-            {
-                "name": "Ay",
-                "display_name": "Point A - Vertical",
+                "name": "angleA",
+                "display_name": "Angle A (Red)",
                 "default": 60,
-                "min": 40,
-                "max": 280,
-                "unit": "units",
-                "url_param": "Ay"
+                "min": 10,
+                "max": 170,
+                "unit": "degrees",
+                "url_param": "angleA"
             },
             {
-                "name": "Bx",
-                "display_name": "Point B - Horizontal",
-                "default": 80,
-                "min": 50,
-                "max": 350,
-                "unit": "units",
-                "url_param": "Bx"
+                "name": "angleB",
+                "display_name": "Angle B (Blue)",
+                "default": 60,
+                "min": 10,
+                "max": 170,
+                "unit": "degrees",
+                "url_param": "angleB"
             },
             {
-                "name": "By",
-                "display_name": "Point B - Vertical",
-                "default": 250,
-                "min": 40,
-                "max": 280,
-                "unit": "units",
-                "url_param": "By"
+                "name": "angleC",
+                "display_name": "Angle C (Green)",
+                "default": 60,
+                "min": 10,
+                "max": 170,
+                "unit": "degrees",
+                "url_param": "angleC"
             },
             {
                 "name": "autoInteract",

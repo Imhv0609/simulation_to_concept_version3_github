@@ -220,24 +220,98 @@ const container = document.getElementById('sim');
 // Parse URL parameters for initial configuration
 function getURLParams() {
   const params = new URLSearchParams(window.location.search);
-  return {
-    Cx: parseFloat(params.get('Cx')) || 320,
-    Cy: parseFloat(params.get('Cy')) || 250,
-    Ax: parseFloat(params.get('Ax')) || 200,
-    Ay: parseFloat(params.get('Ay')) || 60,
-    Bx: parseFloat(params.get('Bx')) || 80,
-    By: parseFloat(params.get('By')) || 250,
-    autoInteract: params.get('autoInteract') === 'true'
-  };
+  
+  // Check if old coordinate-based parameters are provided (backward compatibility only)
+  const hasCoordinates = params.has('Cx') || params.has('Cy') || params.has('Ax') || params.has('Ay') || params.has('Bx') || params.has('By');
+  
+  if (hasCoordinates) {
+    // Backward compatibility: support old coordinate-based parameters
+    return {
+      useAngles: false,
+      Cx: parseFloat(params.get('Cx')) || 320,
+      Cy: parseFloat(params.get('Cy')) || 250,
+      Ax: parseFloat(params.get('Ax')) || 200,
+      Ay: parseFloat(params.get('Ay')) || 60,
+      Bx: parseFloat(params.get('Bx')) || 80,
+      By: parseFloat(params.get('By')) || 250,
+      autoInteract: params.get('autoInteract') === 'true'
+    };
+  } else {
+    // PRIMARY: Always use angle-based parameters (default and from URL)
+    const angleA = parseFloat(params.get('angleA')) || 60;
+    const angleB = parseFloat(params.get('angleB')) || 60;
+    const angleC = parseFloat(params.get('angleC')) || (180 - angleA - angleB);
+    
+    return {
+      useAngles: true,
+      angleA: angleA,
+      angleB: angleB,
+      angleC: angleC,
+      autoInteract: params.get('autoInteract') === 'true'
+    };
+  }
 }
 
 const urlParams = getURLParams();
 
-let A = {x: urlParams.Ax, y: urlParams.Ay};
-let B = {x: urlParams.Bx, y: urlParams.By};
-let C = {x: urlParams.Cx, y: urlParams.Cy};
-let hasInteracted = urlParams.autoInteract;
-let dragHandlePos = {x: C.x, y: C.y};
+// Initialize points based on URL parameters
+let A, B, C, hasInteracted, dragHandlePos;
+
+if (urlParams.useAngles) {
+  // Build triangle from angles (intuitive approach)
+  const result = buildTriangleFromAngles(urlParams.angleA, urlParams.angleB, urlParams.angleC);
+  A = result.A;
+  B = result.B;
+  C = result.C;
+  hasInteracted = urlParams.autoInteract;
+  dragHandlePos = {x: C.x, y: C.y};
+} else {
+  // Use coordinates directly (legacy approach)
+  A = {x: urlParams.Ax, y: urlParams.Ay};
+  B = {x: urlParams.Bx, y: urlParams.By};
+  C = {x: urlParams.Cx, y: urlParams.Cy};
+  hasInteracted = urlParams.autoInteract;
+  dragHandlePos = {x: C.x, y: C.y};
+}
+
+// Build triangle from angle specifications
+function buildTriangleFromAngles(angleA, angleB, angleC) {
+  // Normalize angles to sum to 180
+  const sum = angleA + angleB + angleC;
+  if (Math.abs(sum - 180) > 0.1) {
+    const ratio = 180 / sum;
+    angleA *= ratio;
+    angleB *= ratio;
+    angleC *= ratio;
+  }
+  
+  // Convert to radians
+  const radA = angleA * Math.PI / 180;
+  const radB = angleB * Math.PI / 180;
+  const radC = angleC * Math.PI / 180;
+  
+  // Fixed base for consistency
+  const baseLength = 180;
+  const Ax = 200, Ay = 60;
+  const Bx = 80, By = 250;
+  
+  // Calculate third point using law of sines
+  const sideAB = Math.sqrt((Bx - Ax) ** 2 + (By - Ay) ** 2);
+  const sideBC = sideAB * Math.sin(radA) / Math.sin(radC);
+  
+  // Position C based on angle at B
+  const angleBtoA = Math.atan2(Ay - By, Ax - Bx);
+  const angleBtoC = angleBtoA + radB;
+  
+  const Cx = Bx + sideBC * Math.cos(angleBtoC);
+  const Cy = By + sideBC * Math.sin(angleBtoC);
+  
+  return {
+    A: {x: Ax, y: Ay},
+    B: {x: Bx, y: By},
+    C: {x: Cx, y: Cy}
+  };
+}
 
 function calcAngles() {
   const ab = Math.sqrt((B.x-A.x)**2 + (B.y-A.y)**2);
@@ -463,14 +537,35 @@ document.addEventListener('mouseup', () => { dragging = false; });
 window.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'update-params') {
     const params = event.data.parameters;
-    if (params.Cx !== undefined) C.x = Math.max(60, Math.min(340, params.Cx));
-    if (params.Cy !== undefined) C.y = Math.max(40, Math.min(280, params.Cy));
-    if (params.Ax !== undefined) A.x = Math.max(50, Math.min(350, params.Ax));
-    if (params.Ay !== undefined) A.y = Math.max(40, Math.min(280, params.Ay));
-    if (params.Bx !== undefined) B.x = Math.max(50, Math.min(350, params.Bx));
-    if (params.By !== undefined) B.y = Math.max(40, Math.min(280, params.By));
-    render();
-    postStateToParent();
+    
+    // Support angle-based updates (intuitive for students)
+    if (params.angleA !== undefined || params.angleB !== undefined || params.angleC !== undefined) {
+      const angleA = params.angleA !== undefined ? params.angleA : calcAngles().a;
+      const angleB = params.angleB !== undefined ? params.angleB : calcAngles().b;
+      const angleC = params.angleC !== undefined ? params.angleC : calcAngles().c;
+      
+      const result = buildTriangleFromAngles(angleA, angleB, angleC);
+      A = result.A;
+      B = result.B;
+      C = result.C;
+      
+      hasInteracted = true;
+      render();
+      postStateToParent();
+    }
+    // Also support coordinate-based updates (legacy)
+    else if (params.Cx !== undefined || params.Cy !== undefined || 
+             params.Ax !== undefined || params.Ay !== undefined ||
+             params.Bx !== undefined || params.By !== undefined) {
+      if (params.Cx !== undefined) C.x = Math.max(60, Math.min(340, params.Cx));
+      if (params.Cy !== undefined) C.y = Math.max(40, Math.min(280, params.Cy));
+      if (params.Ax !== undefined) A.x = Math.max(50, Math.min(350, params.Ax));
+      if (params.Ay !== undefined) A.y = Math.max(40, Math.min(280, params.Ay));
+      if (params.Bx !== undefined) B.x = Math.max(50, Math.min(350, params.Bx));
+      if (params.By !== undefined) B.y = Math.max(40, Math.min(280, params.By));
+      render();
+      postStateToParent();
+    }
   }
 });
 

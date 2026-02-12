@@ -14,12 +14,28 @@ ENV_PATH = Path(__file__).parent / ".env"
 load_dotenv(ENV_PATH)
 
 # ═══════════════════════════════════════════════════════════════════════
+# API TRACKER INITIALIZATION
+# ═══════════════════════════════════════════════════════════════════════
+
+# Import API tracker utilities
+from api_tracker_utils.tracker import (
+    get_best_api_key_for_model,
+    track_model_call,
+    get_tracker_stats
+)
+from api_tracker_utils.error import MinuteLimitExhaustedError, DayLimitExhaustedError
+
+# ═══════════════════════════════════════════════════════════════════════
 # LLM CONFIGURATION
 # ═══════════════════════════════════════════════════════════════════════
 
+# Fallback API key (for backward compatibility, but tracker will be used)
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemma-3-27b-it")
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0.7"))
+
+# API Tracker enabled flag
+USE_API_TRACKER = os.getenv("USE_API_TRACKER", "true").lower() == "true"
 
 # ═══════════════════════════════════════════════════════════════════════
 # TEACHING AGENT CONFIGURATION
@@ -72,8 +88,20 @@ SIMULATION_FILE = _current_sim["file"]
 
 def validate_config():
     """Validate that required configuration is present."""
-    if not GOOGLE_API_KEY:
-        raise ValueError("GOOGLE_API_KEY is not set in .env file")
+    if USE_API_TRACKER:
+        # When using tracker, validate that API keys are available
+        try:
+            from api_tracker_utils.tracker import get_available_api_keys
+            keys = get_available_api_keys()
+            print(f"✅ API Tracker enabled: {len(keys)} API keys available")
+        except RuntimeError as e:
+            raise ValueError(f"API Tracker error: {e}")
+    else:
+        # Fallback: validate single API key
+        if not GOOGLE_API_KEY:
+            raise ValueError("GOOGLE_API_KEY is not set in .env file")
+        print(f"✅ Using single API key (tracker disabled)")
+    
     print(f"✅ Config loaded: Model={GEMINI_MODEL}, MaxExchanges={MAX_EXCHANGES}")
     print(f"✅ Current Simulation: {TOPIC_TITLE} ({CURRENT_SIMULATION_ID})")
     return True
