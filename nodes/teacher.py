@@ -27,11 +27,11 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.runnables import RunnableConfig
 
 from config import (
-    GOOGLE_API_KEY, GEMINI_MODEL, TEMPERATURE, CANNOT_DEMONSTRATE, 
-    PARAMETER_INFO, TOPIC_TITLE, TOPIC_DESCRIPTION, USE_API_TRACKER,
+    GOOGLE_API_KEY, GEMINI_MODEL, TEMPERATURE, USE_API_TRACKER,
     get_best_api_key_for_model, track_model_call
 )
 from state import add_message_to_history
+from simulations_config import get_simulation
 
 
 def get_llm():
@@ -190,6 +190,19 @@ def teacher_node(state: Dict[str, Any], config: RunnableConfig) -> Dict[str, Any
     print("\n" + "="*60)
     print("🎓 TEACHER NODE: Generating response")
     print("="*60)
+    
+    # Load simulation config dynamically from state (NOT from cached module imports!)
+    simulation_id = state.get("simulation_id", "simple_pendulum")
+    sim_config = get_simulation(simulation_id)
+    if not sim_config:
+        raise ValueError(f"Unknown simulation: {simulation_id}")
+    
+    TOPIC_TITLE = sim_config["title"]
+    TOPIC_DESCRIPTION = sim_config["description"]
+    CANNOT_DEMONSTRATE = sim_config["cannot_demonstrate"]
+    PARAMETER_INFO = sim_config["parameter_info"]
+    
+    print(f"   🎮 Loaded config for: {TOPIC_TITLE} ({simulation_id})")
     
     # Get current concept
     concepts = state.get("concepts", [])
@@ -589,10 +602,9 @@ REMEMBER: Output ONLY the JSON object. Start your response with {{ and end with 
             pass
     
     # Build simulation URL for LangSmith metadata
-    from simulations_config import get_simulation
+    # Use the simulation_id from state (already loaded at top of function)
+    # sim_config should already be available from the function scope
     import os
-    simulation_id = os.environ.get("SIMULATION_ID", "simple_pendulum")
-    sim_config = get_simulation(simulation_id)
     
     # Build URL with current parameters
     base_url = sim_config.get("file", "")

@@ -274,6 +274,79 @@ SIMULATIONS = {
         ],
         "auto_start_param": None,
         "topic": "Interactive Triangle Angles"
+    },
+    
+    "speed_race": {
+        "name": "Speed, Distance & Time Race",
+        "description": "Race simulation comparing speeds of walker, cyclist, car, and train",
+        "base_url": f"{GITHUB_PAGES_BASE}/simulation_7_speed_race.html",
+        "parameters": [
+            {
+                "name": "speedWalker",
+                "display_name": "Walker Speed",
+                "default": 5,
+                "min": 1,
+                "max": 10,
+                "unit": "km/h",
+                "url_param": "speedWalker"
+            },
+            {
+                "name": "speedCyclist",
+                "display_name": "Cyclist Speed",
+                "default": 20,
+                "min": 5,
+                "max": 40,
+                "unit": "km/h",
+                "url_param": "speedCyclist"
+            },
+            {
+                "name": "speedCar",
+                "display_name": "Car Speed",
+                "default": 60,
+                "min": 20,
+                "max": 120,
+                "unit": "km/h",
+                "url_param": "speedCar"
+            },
+            {
+                "name": "speedTrain",
+                "display_name": "Train Speed",
+                "default": 100,
+                "min": 50,
+                "max": 200,
+                "unit": "km/h",
+                "url_param": "speedTrain"
+            }
+        ],
+        "auto_start_param": None,
+        "topic": "Speed, Distance & Time"
+    },
+    
+    "time_units": {
+        "name": "Time Units Converter",
+        "description": "Convert between different units of time (hours, minutes, seconds, milliseconds)",
+        "base_url": f"{GITHUB_PAGES_BASE}/simulation_5_time_units.html",
+        "parameters": [
+            {
+                "name": "timeValue",
+                "display_name": "Time Value",
+                "default": 1,
+                "min": 0.1,
+                "max": 100,
+                "unit": "",
+                "url_param": "timeValue"
+            },
+            {
+                "name": "timeUnit",
+                "display_name": "Time Unit",
+                "default": "s",
+                "options": ["h", "min", "s", "ms"],
+                "option_labels": ["hours (h)", "minutes (min)", "seconds (s)", "milliseconds (ms)"],
+                "url_param": "timeUnit"
+            }
+        ],
+        "auto_start_param": None,
+        "topic": "Time Units & SI Standards"
     }
 }
 

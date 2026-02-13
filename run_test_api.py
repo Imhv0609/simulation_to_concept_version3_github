@@ -41,6 +41,7 @@ from tester_agent.evaluator import Evaluator
 from tester_agent.personas import personas
 from tester_agent.session_metrics import compute_session_metrics
 from tester_agent.simulation_descriptor import format_simulation_from_api_metadata
+from tester_agent.parameter_validator import ParameterValidator
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -222,8 +223,11 @@ def run_test_api():
     simulation_id, simulation_title = select_simulation(api_client)
     print(f"✅ Selected simulation: {simulation_title} ({simulation_id})")
     
-    # 4. Initialize Tester Agent
+    # 4. Initialize Tester Agent and Validator
+    print("\n⏳ Initializing tester agent and validator...")
     tester = TesterAgent(persona)
+    validator = ParameterValidator(simulation_id)
+    print("   ✅ Parameter validator initialized")
     
     # 5. Start Session via API
     print("\n" + "="*60)
@@ -247,9 +251,10 @@ def run_test_api():
     print(f"  📝 Session ID: {session_id}")
     print(f"\n🤖 Teacher: {agent_msg[:200]}...")
     
-    # Track turns for history
+    # Track turns for history and validation
     turns = [{"teacher_message": agent_msg, "student_message": None}]
     last_response = start_response
+    previous_params = None
     
     # 6. Conversation Loop
     print("\n" + "="*70)
@@ -257,63 +262,124 @@ def run_test_api():
     print("="*70)
     
     turn_count = 0
+    previous_params = None
     
-    while not session_complete:
-        turn_count += 1
-        print(f"\n{'─'*50}")
-        print(f"--- Turn {turn_count} ---")
-        
-        # Check for simulation context in the API response
-        simulation_description = format_simulation_from_api_metadata(last_response)
-        
-        # Get tester response
-        if simulation_description:
-            print("🔬 [Simulation context provided to tester agent]")
-            user_msg = tester.respond_with_simulation_context(agent_msg, simulation_description)
+    try:
+        while not session_complete:
+            turn_count += 1
+            print(f"\n{'─'*50}")
+            print(f"--- Turn {turn_count} ---")
+            
+            # Check for simulation context in the API response
+            simulation_description = format_simulation_from_api_metadata(last_response)
+            
+            # Get tester response
+            if simulation_description:
+                print("🔬 [Simulation context provided to tester agent]")
+                user_msg = tester.respond_with_simulation_context(agent_msg, simulation_description)
+            else:
+                user_msg = tester.respond(agent_msg)
+            
+            print(f"👤 {persona.name}: {user_msg}")
+            
+            # Update the last turn with student message
+            turns[-1]["student_message"] = user_msg
+            
+            # Delay for rate limits
+            print(f"   ⏳ Waiting {TURN_DELAY}s for rate limits...")
+            time.sleep(TURN_DELAY)
+            
+            # Send response via API
+            try:
+                continue_response = api_client.send_response(session_id, user_msg)
+            except requests.exceptions.RequestException as e:
+                print(f"❌ Error sending response: {e}")
+                break
+            
+            agent_msg = continue_response.get("teacher_message", {}).get("text", "")
+            learning_state = continue_response.get("learning_state", {})
+            session_complete = learning_state.get("session_complete", False)
+            last_response = continue_response
+            
+            # Track this turn
+            turns.append({"teacher_message": agent_msg, "student_message": None})
+            
+            print(f"🤖 Teacher: {agent_msg[:200]}...")
+            
+            # Validate parameters from API response
+            print(f"   🔍 Validating parameters...")
+            
+            # Build state dict from API response for validation
+            simulation_data = continue_response.get("simulation", {})
+            current_params = simulation_data.get("current_params", {})
+            param_history = simulation_data.get("parameter_history", [])
+            simulation_url = simulation_data.get("html_url", "")  # Fixed: API uses 'html_url' not 'url'
+            
+            state_for_validation = {
+                "current_params": current_params,
+                "parameter_history": param_history,
+                "simulation_url": simulation_url,
+            }
+            
+            validation_result = validator.validate_turn(
+                turn_number=turn_count,
+                teacher_message=agent_msg,
+                state=state_for_validation,
+                previous_params=previous_params
+            )
+            
+            if validation_result.passed:
+                print(f"   ✅ Validation passed")
+            else:
+                print(f"   ❌ Validation failed: {len(validation_result.issues)} issues")
+                for issue in validation_result.issues:
+                    print(f"      • {issue}")
+            
+            if validation_result.warnings:
+                print(f"   ⚠️  {len(validation_result.warnings)} warnings")
+                for warning in validation_result.warnings[:2]:  # Show first 2
+                    print(f"      • {warning}")
+            
+            # Update previous params for next turn
+            if current_params:
+                previous_params = current_params.copy()
+            
+            # Print progress from API response
+            concepts_info = continue_response.get("concepts", {})
+            print(f"   📊 Concept: {concepts_info.get('current_index', '?')}/{concepts_info.get('total', '?')} | "
+                  f"Understanding: {learning_state.get('understanding_level', '?')} | "
+                  f"Strategy: {learning_state.get('strategy', '?')}")
+    
+    except KeyboardInterrupt:
+        print(f"\n\n⚠️  Test interrupted by user (Ctrl+C)")
+        print(f"   Saving results collected so far...")
+    except Exception as e:
+        print(f"\n\n❌ Error during test: {e}")
+        print(f"   Saving results collected so far...")
+        import traceback
+        traceback.print_exc()
+    finally:
+        # Always save results, even on error
+        print(f"\n{'='*70}")
+        if session_complete:
+            print(f"✅ SESSION COMPLETE after {turn_count} turns")
         else:
-            user_msg = tester.respond(agent_msg)
-        
-        print(f"👤 {persona.name}: {user_msg}")
-        
-        # Update the last turn with student message
-        turns[-1]["student_message"] = user_msg
-        
-        # Delay for rate limits
-        print(f"   ⏳ Waiting {TURN_DELAY}s for rate limits...")
-        time.sleep(TURN_DELAY)
-        
-        # Send response via API
-        try:
-            continue_response = api_client.send_response(session_id, user_msg)
-        except requests.exceptions.RequestException as e:
-            print(f"❌ Error sending response: {e}")
-            break
-        
-        agent_msg = continue_response.get("teacher_message", {}).get("text", "")
-        learning_state = continue_response.get("learning_state", {})
-        session_complete = learning_state.get("session_complete", False)
-        last_response = continue_response
-        
-        # Track this turn
-        turns.append({"teacher_message": agent_msg, "student_message": None})
-        
-        print(f"🤖 Teacher: {agent_msg[:200]}...")
-        
-        # Print progress from API response
-        concepts_info = continue_response.get("concepts", {})
-        print(f"   📊 Concept: {concepts_info.get('current_index', '?')}/{concepts_info.get('total', '?')} | "
-              f"Understanding: {learning_state.get('understanding_level', '?')} | "
-              f"Strategy: {learning_state.get('strategy', '?')}")
+            print(f"⚠️  SESSION INCOMPLETE - Stopped after {turn_count} turns")
+        print(f"{'='*70}")
     
-    print(f"\n{'='*70}")
-    print(f"✅ SESSION COMPLETE after {turn_count} turns")
-    print(f"{'='*70}")
+    # Skip remaining processing if no turns collected (session never started)
+    if not turns:
+        print("⚠️  No turns to process - session never started properly")
+        return
     
-    # 7. Build History for Evaluation
+    # 7. Print Parameter Validation Summary
+    validator.print_summary()
+    
+    # 8. Build History for Evaluation
     history_for_reports = extract_history_from_api_responses(turns)
     print(f"\n📜 Conversation length: {len(history_for_reports)} messages")
     
-    # 8. Compute Session Metrics
+    # 9. Compute Session Metrics
     print("\n" + "="*60)
     print("📊 Computing Session Metrics...")
     print("="*60)
@@ -342,7 +408,7 @@ def run_test_api():
         import traceback
         traceback.print_exc()
     
-    # 9. Evaluate Educational Quality
+    # 10. Evaluate Educational Quality
     print("\n" + "="*60)
     print("🎓 Evaluating Educational Quality...")
     print("="*60)
@@ -362,7 +428,7 @@ def run_test_api():
         import traceback
         traceback.print_exc()
     
-    # 10. Save Reports
+    # 11. Save Reports
     print("\n" + "="*60)
     print("💾 Saving Reports...")
     print("="*60)
@@ -383,6 +449,7 @@ def run_test_api():
         "persona": persona.model_dump(),
         "conversation_history": history_for_reports,
         "educational_evaluation": evaluation,
+        "parameter_validation": validator.get_summary(),
     }
     
     if session_metrics:
@@ -395,7 +462,7 @@ def run_test_api():
         json.dump(report, f, indent=2)
     print(f"✅ Report saved to {report_path}")
     
-    # 11. Print Final Summary
+    # 12. Print Final Summary
     print("\n" + "="*70)
     print("📋 FINAL TEST SUMMARY")
     print("="*70)
@@ -406,7 +473,16 @@ def run_test_api():
     print(f"  Messages:      {len(history_for_reports)}")
     print(f"  API Mode:      {API_BASE_URL}")
     
+    # Parameter validation summary
+    val_summary = validator.get_summary()
+    print(f"\n  🔍 PARAMETER VALIDATION:")
+    print(f"  Pass Rate:     {val_summary['pass_rate']*100:.1f}%")
+    print(f"  Issues:        {val_summary['total_issues']}")
+    print(f"  Warnings:      {val_summary['total_warnings']}")
+    print(f"  Param Changes: {val_summary['total_actual_changes']}")
+    
     if session_metrics:
+        print(f"\n  📊 SESSION METRICS:")
         print(f"  Concepts:      {session_metrics.num_concepts_covered}")
         print(f"  User Type:     {session_metrics.user_type}")
         print(f"  Engagement:    {session_metrics.user_engagement_rating}/5")
@@ -415,7 +491,8 @@ def run_test_api():
     if evaluation and "scores" in evaluation:
         scores = evaluation["scores"]
         avg = evaluation.get("average_score", 0)
-        print(f"  Pedagogy Avg:  {avg}/5")
+        print(f"\n  🎓 PEDAGOGY:")
+        print(f"  Average:       {avg}/5")
         for key, val in scores.items():
             print(f"    - {key}: {val}/5")
     

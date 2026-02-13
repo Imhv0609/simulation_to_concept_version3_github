@@ -38,6 +38,7 @@ from tester_agent.evaluator import Evaluator
 from tester_agent.personas import personas
 from tester_agent.session_metrics import compute_session_metrics
 from tester_agent.simulation_descriptor import format_simulation_context_for_tester
+from tester_agent.parameter_validator import ParameterValidator
 
 # Import our agent's core functions
 from config import validate_config
@@ -111,7 +112,8 @@ def convert_state_to_history(state: dict) -> list:
 
 def save_intermediate_report(thread_id, simulation_id, sim_config, persona, 
                             turn_count, state, timestamp, 
-                            session_metrics=None, evaluation=None, completed=False):
+                            session_metrics=None, evaluation=None, completed=False,
+                            parameter_validation=None):
     """Save intermediate report after each turn to preserve progress."""
     os.makedirs("test_reports", exist_ok=True)
     
@@ -136,6 +138,9 @@ def save_intermediate_report(thread_id, simulation_id, sim_config, persona,
     
     if evaluation:
         report["educational_evaluation"] = evaluation
+    
+    if parameter_validation:
+        report["parameter_validation"] = parameter_validation
     
     report_filename = f"test_report_{simulation_id}_{persona.name.lower().replace(' ', '_')}_{timestamp}.json"
     report_path = os.path.join("test_reports", report_filename)
@@ -181,9 +186,11 @@ def run_test():
     from graph import reset_graph
     reset_graph()
     
-    # 4. Initialize agents
-    print("\n⏳ Initializing agents...")
+    # 4. Initialize agents and validator
+    print("\n⏳ Initializing agents and validator...")
     tester = TesterAgent(persona)
+    validator = ParameterValidator(simulation_id)
+    print("   ✅ Parameter validator initialized")
     
     # Create session
     thread_id = f"test_{simulation_id}_{persona.name.lower().replace(' ', '_')}_{uuid.uuid4().hex[:6]}"
@@ -204,6 +211,7 @@ def run_test():
     turn_count = 0
     session_metrics = None
     evaluation = None
+    previous_params = None  # Track parameters for validation
     
     try:
         # 5. Start the teaching session
@@ -217,7 +225,8 @@ def run_test():
         print("💬 CONVERSATION LOOP")
         print("="*70)
         
-        while not state.get("session_complete", False):
+        try:
+            while not state.get("session_complete", False):
             turn_count += 1
             print(f"\n{'─'*50}")
             print(f"--- Turn {turn_count} ---")
@@ -243,8 +252,33 @@ def run_test():
             # Send response to agent
             state = continue_session(user_msg, thread_id)
             agent_msg = state.get("last_teacher_message", "")
+            current_params = state.get("current_params", {})
             
             print(f"🤖 Teacher: {agent_msg[:200]}...")
+            
+            # Validate parameters
+            print(f"   🔍 Validating parameters...")
+            validation_result = validator.validate_turn(
+                turn_number=turn_count,
+                teacher_message=agent_msg,
+                state=state,
+                previous_params=previous_params
+            )
+            
+            if validation_result.passed:
+                print(f"   ✅ Validation passed")
+            else:
+                print(f"   ❌ Validation failed: {len(validation_result.issues)} issues")
+                for issue in validation_result.issues:
+                    print(f"      • {issue}")
+            
+            if validation_result.warnings:
+                print(f"   ⚠️  {len(validation_result.warnings)} warnings")
+                for warning in validation_result.warnings[:2]:  # Show first 2
+                    print(f"      • {warning}")
+            
+            # Update previous params for next turn
+            previous_params = current_params.copy()
             
             # Print progress
             current_idx = state.get("current_concept_index", 0)
@@ -260,21 +294,44 @@ def run_test():
             print(f"   💾 Saving progress...")
             report_path = save_intermediate_report(
                 thread_id, simulation_id, sim_config, persona,
-                turn_count, state, timestamp, completed=False
+                turn_count, state, timestamp, completed=False,
+                parameter_validation=validator.get_summary()
             )
             print(f"   ✅ Saved to {os.path.basename(report_path)}")
+        
+        except KeyboardInterrupt:
+            print(f"\n\n⚠️  Test interrupted by user (Ctrl+C)")
+            print(f"   Saving results collected so far...")
+        except Exception as e:
+            print(f"\n\n❌ Error during test: {e}")
+            print(f"   Saving results collected so far...")
+            import traceback
+            traceback.print_exc()
+        finally:
+            # Always print status
+            print(f"\n{'='*70}")
+            session_complete = state.get("session_complete", False) if state else False
+            if session_complete:
+                print(f"✅ SESSION COMPLETE after {turn_count} turns")
+            else:
+                print(f"⚠️  SESSION INCOMPLETE - Stopped after {turn_count} turns")
+            print(f"{'='*70}")
     
-    print(f"\n{'='*70}")
-    print(f"✅ SESSION COMPLETE after {turn_count} turns")
-    print(f"{'='*70}")
+    # Skip remaining processing if no state (session never started)
+    if state is None:
+        print("⚠️  No state to process - session never started properly")
+        return
     
-    # 7. Get final state and convert history
+    # 7. Get final state and convert history (only if state exists)
     final_state = get_session_state(thread_id)
     history_for_reports = convert_state_to_history(final_state)
     
     print(f"\n📜 Conversation length: {len(history_for_reports)} messages")
     
-    # 8. Compute Session Metrics
+    # 8. Print Parameter Validation Summary
+    validator.print_summary()
+    
+    # 9. Compute Session Metrics
     print("\n" + "="*60)
     print("📊 Computing Session Metrics...")
     print("="*60)
@@ -306,7 +363,7 @@ def run_test():
         import traceback
         traceback.print_exc()
     
-    # 9. Evaluate Educational Quality
+    # 10. Evaluate Educational Quality
     print("\n" + "="*60)
     print("🎓 Evaluating Educational Quality...")
     print("="*60)
@@ -327,7 +384,7 @@ def run_test():
         traceback.print_exc()
     
     finally:
-        # 10. Save Final Report (always runs, even on error)
+        # 11. Save Final Report (always runs, even on error)
         print("\n" + "="*60)
         print("💾 Saving Final Report...")
         print("="*60)
@@ -340,7 +397,8 @@ def run_test():
             report_path = save_intermediate_report(
                 thread_id, simulation_id, sim_config, persona,
                 turn_count, final_state, timestamp,
-                session_metrics, evaluation, completed=completed
+                session_metrics, evaluation, completed=completed,
+                parameter_validation=validator.get_summary()
             )
             print(f"✅ Final report saved to {report_path}")
             
@@ -354,7 +412,7 @@ def run_test():
         else:
             print("⚠️  No state to save (session never started)")
     
-        # 11. Print Final Summary
+        # 12. Print Final Summary
         print("\n" + "="*70)
         print("📋 FINAL TEST SUMMARY")
         print("="*70)
@@ -367,7 +425,16 @@ def run_test():
             history_for_reports = convert_state_to_history(state)
             print(f"  Messages:      {len(history_for_reports)}")
         
+        # Parameter validation summary
+        val_summary = validator.get_summary()
+        print(f"\n  🔍 PARAMETER VALIDATION:")
+        print(f"  Pass Rate:     {val_summary['pass_rate']*100:.1f}%")
+        print(f"  Issues:        {val_summary['total_issues']}")
+        print(f"  Warnings:      {val_summary['total_warnings']}")
+        print(f"  Param Changes: {val_summary['total_actual_changes']}")
+        
         if session_metrics:
+            print(f"\n  📊 SESSION METRICS:")
             print(f"  Concepts:      {session_metrics.num_concepts_covered}")
             print(f"  User Type:     {session_metrics.user_type}")
             print(f"  Engagement:    {session_metrics.user_engagement_rating}/5")
@@ -376,7 +443,8 @@ def run_test():
         if evaluation and "scores" in evaluation:
             scores = evaluation["scores"]
             avg = evaluation.get("average_score", 0)
-            print(f"  Pedagogy Avg:  {avg}/5")
+            print(f"\n  🎓 PEDAGOGY:")
+            print(f"  Average:       {avg}/5")
             for key, val in scores.items():
                 print(f"    - {key}: {val}/5")
         

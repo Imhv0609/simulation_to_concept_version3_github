@@ -330,24 +330,32 @@ What can be demonstrated:
             "speedWalker": {
                 "label": "Walker Speed",
                 "range": "1-10 km/h",
+                "min": 1,
+                "max": 10,
                 "url_key": "speedWalker",
                 "effect": "Controls how fast the walker moves (typical walking speed: 5 km/h)"
             },
             "speedCyclist": {
                 "label": "Cyclist Speed",
                 "range": "5-40 km/h",
+                "min": 5,
+                "max": 40,
                 "url_key": "speedCyclist",
                 "effect": "Controls how fast the cyclist moves (typical cycling speed: 20 km/h)"
             },
             "speedCar": {
                 "label": "Car Speed",
                 "range": "20-120 km/h",
+                "min": 20,
+                "max": 120,
                 "url_key": "speedCar",
                 "effect": "Controls how fast the car moves (typical city car speed: 60 km/h)"
             },
             "speedTrain": {
                 "label": "Train Speed",
                 "range": "50-200 km/h",
+                "min": 50,
+                "max": 200,
                 "url_key": "speedTrain",
                 "effect": "Controls how fast the train moves (typical train speed: 100 km/h)"
             }
@@ -382,6 +390,82 @@ What can be demonstrated:
                 "related_params": ["speedWalker", "speedCyclist", "speedCar", "speedTrain"]
             }
         ]
+}
+
+# =============================================================================
+# TIME UNITS CONVERTER SIMULATION
+# =============================================================================
+SIMULATIONS["time_units"] = {
+    "title": "Time Units Converter",
+    "file": "simulations/simulation_5_time_units.html",
+    "description": """
+An interactive time units converter that helps students understand the SI unit of time 
+and conversions between different time units (hours, minutes, seconds, milliseconds). 
+Students can input a time value in one unit and see equivalent values in all other units.
+
+What can be demonstrated:
+- The second (s) is the SI unit of time
+- Conversion between hours, minutes, seconds, and milliseconds
+- Proper SI notation for time units (s, min, h, ms - not sec, mins, hrs)
+- Practical applications of small time units in sports, medicine, computers, and music
+- Mathematical relationships: 1 hour = 60 minutes = 3600 seconds
+""",
+    "cannot_demonstrate": [
+        "Time periods longer than hours (days, months, years)",
+        "Time zones or local time differences",
+        "Calendar systems or date calculations",
+        "Historical timekeeping methods"
+    ],
+    "initial_params": {
+        "timeValue": 1,
+        "timeUnit": "s"
+    },
+    "parameter_info": {
+        "timeValue": {
+            "label": "Time Value",
+            "range": "0.001-10000",
+            "min": 0.001,
+            "max": 10000,
+            "url_key": "timeValue",
+            "effect": "The numeric value of time to convert to different units"
+        },
+        "timeUnit": {
+            "label": "Time Unit",
+            "range": "h, min, s, ms",
+            "url_key": "timeUnit",
+            "effect": "The unit of the input time: h (hours), min (minutes), s (seconds), ms (milliseconds)"
+        }
+    },
+    "concepts": [
+        {
+            "id": 1,
+            "title": "SI Unit of Time (Second)",
+            "description": "Understanding that the second is the fundamental SI unit for measuring time.",
+            "key_insight": "The second (s) is the SI base unit for time. All other time units are derived from seconds: 60s = 1min, 3600s = 1h",
+            "related_params": ["timeValue", "timeUnit"]
+        },
+        {
+            "id": 2,
+            "title": "Time Unit Conversions",
+            "description": "Learning to convert between different units of time using conversion factors.",
+            "key_insight": "1 hour = 60 minutes, 1 minute = 60 seconds, 1 second = 1000 milliseconds. Use multiplication/division to convert between units",
+            "related_params": ["timeValue", "timeUnit"]
+        },
+        {
+            "id": 3,
+            "title": "Proper SI Notation for Time",
+            "description": "Using correct standardized symbols for time units without periods or pluralization.",
+            "key_insight": "Correct notation: s (not sec), min (not mins), h (not hr/hrs), ms (not msec). SI symbols are always singular and without periods",
+            "related_params": ["timeUnit"]
+        },
+        {
+            "id": 4,
+            "title": "Applications of Small Time Units",
+            "description": "Understanding why milliseconds and smaller units are important in real-world applications.",
+            "key_insight": "Milliseconds matter in Olympic sports (race results), medicine (ECG), computers (processor speed), and music (digital recording samples)",
+            "related_params": ["timeValue", "timeUnit"]
+        }
+    ]
 }
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -1058,6 +1142,120 @@ QUIZ_QUESTIONS["speed_race"] = [
             "attempt_3": "Set speedWalker to 10 km/h. At this speed, the walker covers 1 km in exactly 6 minutes (360 seconds)."
         },
         "concept_reminder": "To find the minimum speed needed for a certain time: Speed = Distance ÷ Time. For 1 km in 6 minutes (0.1 hours), speed must be at least 1 ÷ 0.1 = 10 km/h. Faster speeds mean even shorter times!"
+    }
+]
+
+# =============================================================================
+# TIME UNITS QUIZ QUESTIONS
+# =============================================================================
+QUIZ_QUESTIONS["time_units"] = [
+    {
+        "id": "time_q1",
+        "challenge": "Convert 5 minutes into seconds. Enter 5 as the time value and select 'minutes' as the unit to see the conversion.",
+        "target_parameters": ["timeValue", "timeUnit"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "timeValue", "operator": ">=", "value": 4.5},
+                {"parameter": "timeValue", "operator": "<=", "value": 5.5},
+                {"parameter": "timeUnit", "operator": "==", "value": "min"}
+            ],
+            "scoring": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"timeValue_min": 4.9, "timeValue_max": 5.1, "timeUnit": "min"},
+                "partial": {"timeValue_min": 4.5, "timeValue_max": 5.5, "timeUnit": "min"}
+            }
+        },
+        "hints": {
+            "attempt_1": "Set the time value to 5 and choose 'minutes' from the dropdown. The converter will show you the equivalent in seconds.",
+            "attempt_2": "Remember: 1 minute = 60 seconds. So 5 minutes = 5 × 60 = 300 seconds.",
+            "attempt_3": "Set timeValue to 5 and timeUnit to 'min'. Look at the seconds result - it should show 300 seconds!"
+        },
+        "concept_reminder": "To convert minutes to seconds, multiply by 60. Each minute contains 60 seconds. So 5 minutes = 5 × 60 = 300 seconds."
+    },
+    {
+        "id": "time_q2",
+        "challenge": "How many hours are in 7200 seconds? Enter 7200 as the time value and select 'seconds' to find out.",
+        "target_parameters": ["timeValue", "timeUnit"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "timeValue", "operator": ">=", "value": 7000},
+                {"parameter": "timeValue", "operator": "<=", "value": 7400},
+                {"parameter": "timeUnit", "operator": "==", "value": "s"}
+            ],
+            "scoring": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"timeValue_min": 7150, "timeValue_max": 7250, "timeUnit": "s"},
+                "partial": {"timeValue_min": 7000, "timeValue_max": 7400, "timeUnit": "s"}
+            }
+        },
+        "hints": {
+            "attempt_1": "Set the time value to 7200 and choose 'seconds' from the dropdown. Look at the hours result.",
+            "attempt_2": "To convert seconds to hours: divide by 3600 (since 1 hour = 3600 seconds). 7200 ÷ 3600 = 2 hours.",
+            "attempt_3": "Set timeValue to 7200 and timeUnit to 's'. The hours display should show 2.00 hours!"
+        },
+        "concept_reminder": "To convert seconds to hours, divide by 3600. Since 1 hour = 60 minutes and 1 minute = 60 seconds, 1 hour = 60 × 60 = 3600 seconds. So 7200 seconds = 7200 ÷ 3600 = 2 hours."
+    },
+    {
+        "id": "time_q3",
+        "challenge": "Express 2.5 hours in milliseconds. Set the time value to 2.5 hours and observe the millisecond conversion.",
+        "target_parameters": ["timeValue", "timeUnit"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "timeValue", "operator": ">=", "value": 2.3},
+                {"parameter": "timeValue", "operator": "<=", "value": 2.7},
+                {"parameter": "timeUnit", "operator": "==", "value": "h"}
+            ],
+            "scoring": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"timeValue_min": 2.4, "timeValue_max": 2.6, "timeUnit": "h"},
+                "partial": {"timeValue_min": 2.3, "timeValue_max": 2.7, "timeUnit": "h"}
+            }
+        },
+        "hints": {
+            "attempt_1": "Set the time value to 2.5 and select 'hours' from the dropdown. Check the milliseconds result.",
+            "attempt_2": "1 hour = 3600 seconds, and 1 second = 1000 milliseconds. So 1 hour = 3,600,000 milliseconds. Therefore, 2.5 hours = 2.5 × 3,600,000 = 9,000,000 milliseconds.",
+            "attempt_3": "Set timeValue to 2.5 and timeUnit to 'h'. The converter shows 9,000,000 ms (9 million milliseconds)!"
+        },
+        "concept_reminder": "To convert hours to milliseconds: multiply by 3,600,000 (1 hour = 3600 seconds, and 1 second = 1000 ms). So 2.5 hours = 2.5 × 3,600,000 = 9,000,000 milliseconds."
+    },
+    {
+        "id": "time_q4",
+        "challenge": "Olympic sprinters finish the 100m race in about 10 seconds. How many milliseconds is that? Enter 10 seconds to find out.",
+        "target_parameters": ["timeValue", "timeUnit"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "timeValue", "operator": ">=", "value": 9.5},
+                {"parameter": "timeValue", "operator": "<=", "value": 10.5},
+                {"parameter": "timeUnit", "operator": "==", "value": "s"}
+            ],
+            "scoring": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"timeValue_min": 9.8, "timeValue_max": 10.2, "timeUnit": "s"},
+                "partial": {"timeValue_min": 9.5, "timeValue_max": 10.5, "timeUnit": "s"}
+            }
+        },
+        "hints": {
+            "attempt_1": "Set the time value to 10 and select 'seconds' as the unit. Check the milliseconds result.",
+            "attempt_2": "Each second contains 1000 milliseconds. So 10 seconds = 10 × 1000 = 10,000 milliseconds.",
+            "attempt_3": "Set timeValue to 10 and timeUnit to 's'. The result shows 10,000 milliseconds - Olympic races are decided by milliseconds!"
+        },
+        "concept_reminder": "1 second = 1000 milliseconds. This is why Olympic sprint times are often measured to the thousandth of a second (milliseconds) - because races are so close! 10 seconds = 10,000 milliseconds."
     }
 ]
     
