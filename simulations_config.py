@@ -563,6 +563,85 @@ What can be demonstrated:
     ]
 }
 
+# =============================================================================
+# SIMPLE PENDULUM NEW SIMULATION
+# =============================================================================
+SIMULATIONS["simple_pendulum_new"] = {
+    "title": "Simple Pendulum Interactive",
+    "file": "simulations/simulation_3_pendulum.html",
+    "description": """
+An interactive simple pendulum simulation where students can adjust the string length and 
+bob mass to explore oscillatory motion. The simulation demonstrates the key physics principle: 
+time period depends ONLY on length, NOT on mass.
+
+What can be demonstrated:
+- Simple harmonic motion (oscillation)
+- Effect of string length on time period (T = 2π√(L/g))
+- Independence of time period from mass
+- Relationship between time period and frequency
+- Real-time tracking of oscillations
+- Mean position and extreme positions
+""",
+    "cannot_demonstrate": [
+        "Effect of amplitude on time period (for small angles)",
+        "Effect of gravity on time period",
+        "Damping or air resistance",
+        "Energy conversion (potential to kinetic)"
+    ],
+    "initial_params": {
+        "length": 100,
+        "mass": 100
+    },
+    "parameter_info": {
+        "length": {
+            "label": "String Length",
+            "range": "50-200 cm",
+            "min": 50,
+            "max": 200,
+            "url_key": "length",
+            "effect": "Longer string = longer time period (slower oscillations). Time period increases with square root of length"
+        },
+        "mass": {
+            "label": "Bob Mass",
+            "range": "50-200 g",
+            "min": 50,
+            "max": 200,
+            "url_key": "mass",
+            "effect": "Mass does NOT affect time period! This is a key discovery - try changing mass and observe that period stays constant"
+        }
+    },
+    "concepts": [
+        {
+            "id": 1,
+            "title": "What is a Simple Pendulum",
+            "description": "Understanding the basic components and motion of a simple pendulum.",
+            "key_insight": "A simple pendulum consists of a mass (bob) hanging from a string attached to a fixed point. When displaced, it swings back and forth in regular oscillations",
+            "related_params": ["length", "mass"]
+        },
+        {
+            "id": 2,
+            "title": "Time Period and Its Formula",
+            "description": "Learning the mathematical relationship that determines how long one complete oscillation takes.",
+            "key_insight": "Time period T = 2π√(L/g), where L is length and g is gravity (9.8 m/s²). The period depends only on length, not on mass!",
+            "related_params": ["length"]
+        },
+        {
+            "id": 3,
+            "title": "Effect of Length on Oscillation",
+            "description": "Discovering how changing the string length changes the oscillation speed.",
+            "key_insight": "Longer pendulums swing more slowly (longer period), shorter pendulums swing faster (shorter period). The relationship follows a square root pattern",
+            "related_params": ["length"]
+        },
+        {
+            "id": 4,
+            "title": "Mass Independence - A Surprising Discovery",
+            "description": "Understanding why mass doesn't affect the time period of a pendulum.",
+            "key_insight": "The time period is independent of mass! A heavy bob and light bob swing at the same rate if the length is the same. This is why pendulums are reliable for timekeeping",
+            "related_params": ["mass", "length"]
+        }
+    ]
+}
+
 # ═══════════════════════════════════════════════════════════════════════
 # HELPER FUNCTIONS
 # ═══════════════════════════════════════════════════════════════════════
@@ -1473,6 +1552,130 @@ QUIZ_QUESTIONS["speed_calculator"] = [
             "attempt_3": "Set calculationMode to 'speed', distance to 60, and time to 2.5. The result shows 24 km/h!"
         },
         "concept_reminder": "To find required speed, divide distance by available time. Speed = Distance ÷ Time. To travel 60 km in 2.5 hours, you need: 60 ÷ 2.5 = 24 km/h."
+    }
+]
+
+# =============================================================================
+# SIMPLE PENDULUM NEW - QUIZ QUESTIONS
+# =============================================================================
+QUIZ_QUESTIONS["simple_pendulum_new"] = [
+    {
+        "id": "pendulum_q1",
+        "challenge": "Set the pendulum length to 150 cm and observe the time period. Notice how the time period increases with length.",
+        "target_parameters": ["length"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "length", "operator": ">=", "value": 145},
+                {"parameter": "length", "operator": "<=", "value": 155}
+            ],
+            "logic": "ALL"
+        },
+        "scoring": {
+            "weights": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"length_min": 148, "length_max": 152},
+                "partial": {"length_min": 145, "length_max": 155}
+            }
+        },
+        "hints": {
+            "attempt_1": "Use the 'String Length' slider to adjust the length to 150 cm. Watch the time period value update.",
+            "attempt_2": "Move the slider on the left side labeled 'String Length' until the display shows 150 cm.",
+            "attempt_3": "Set length to 150 cm. The time period will be approximately 2.47 seconds (calculated from T = 2π√(L/g))."
+        },
+        "concept_reminder": "The time period of a pendulum increases with length. A longer string means slower oscillations. The formula is T = 2π√(L/g), where L is length."
+    },
+    {
+        "id": "pendulum_q2",
+        "challenge": "Now change the bob mass to 150 g (keeping length at 150 cm). Notice that the time period DOES NOT change! This proves mass doesn't affect the period.",
+        "target_parameters": ["length", "mass"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "length", "operator": ">=", "value": 145},
+                {"parameter": "length", "operator": "<=", "value": 155},
+                {"parameter": "mass", "operator": ">=", "value": 145},
+                {"parameter": "mass", "operator": "<=", "value": 155}
+            ],
+            "logic": "ALL"
+        },
+        "scoring": {
+            "weights": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"length_min": 148, "length_max": 152, "mass_min": 148, "mass_max": 152},
+                "partial": {"length_min": 145, "length_max": 155, "mass_min": 145, "mass_max": 155}
+            }
+        },
+        "hints": {
+            "attempt_1": "Keep length at 150 cm, then use the 'Bob Mass' slider to set mass to 150 g. Observe that time period stays the same!",
+            "attempt_2": "Use the right slider (Bob Mass) to change mass to 150 g. The time period won't change because mass doesn't appear in the formula T = 2π√(L/g).",
+            "attempt_3": "Set mass to 150 g while keeping length at 150 cm. This demonstrates the key principle: time period is independent of mass!"
+        },
+        "concept_reminder": "Time period depends ONLY on length, NOT on mass! The formula T = 2π√(L/g) has no mass term. Heavy and light bobs swing at the same rate if length is the same."
+    },
+    {
+        "id": "pendulum_q3",
+        "challenge": "Now set the pendulum length to 50 cm (minimum) and observe how the time period decreases. Shorter pendulum = faster oscillations.",
+        "target_parameters": ["length"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "length", "operator": ">=", "value": 50},
+                {"parameter": "length", "operator": "<=", "value": 55}
+            ],
+            "logic": "ALL"
+        },
+        "scoring": {
+            "weights": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"length_min": 50, "length_max": 52},
+                "partial": {"length_min": 50, "length_max": 55}
+            }
+        },
+        "hints": {
+            "attempt_1": "Move the 'String Length' slider all the way to the left to set it to 50 cm (the minimum value).",
+            "attempt_2": "Set length to 50 cm. You'll see the time period is much shorter now - about 1.43 seconds compared to 2.47 seconds at 150 cm.",
+            "attempt_3": "Drag the length slider to 50 cm. Notice the faster oscillations and shorter time period!"
+        },
+        "concept_reminder": "Shorter pendulums have shorter time periods (faster oscillations). The relationship is T = 2π√(L/g), so T is proportional to √L."
+    },
+    {
+        "id": "pendulum_q4",
+        "challenge": "Set length to 200 cm (maximum) to see the longest time period. This demonstrates the square root relationship between length and period.",
+        "target_parameters": ["length"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "length", "operator": ">=", "value": 195},
+                {"parameter": "length", "operator": "<=", "value": 200}
+            ],
+            "logic": "ALL"
+        },
+        "scoring": {
+            "weights": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"length_min": 199, "length_max": 200},
+                "partial": {"length_min": 195, "length_max": 200}
+            }
+        },
+        "hints": {
+            "attempt_1": "Move the 'String Length' slider all the way to the right to set it to 200 cm (the maximum value).",
+            "attempt_2": "Set length to 200 cm. The time period will be approximately 2.85 seconds - the longest possible in this simulation.",
+            "attempt_3": "Drag the length slider to maximum (200 cm). Notice the very slow oscillations!"
+        },
+        "concept_reminder": "The longest pendulum (200 cm) has the longest time period. Length and period follow T = 2π√(L/g). Doubling length increases period by √2 ≈ 1.41 times."
     }
 ]
     

@@ -392,12 +392,43 @@ SIMULATIONS = {
         ],
         "auto_start_param": None,
         "topic": "Speed, Distance & Time Relationships"
+    },
+    
+    "simple_pendulum_new": {
+        "name": "Simple Pendulum Interactive",
+        "description": "Explore how length and mass affect pendulum oscillations. Discover why time period depends only on length!",
+        "base_url": "simulations/simulation_3_pendulum.html",
+        "parameters": [
+            {
+                "name": "length",
+                "type": "slider",
+                "display_name": "String Length (cm)",
+                "default": 100,
+                "min": 50,
+                "max": 200,
+                "unit": "cm",
+                "url_param": "length"
+            },
+            {
+                "name": "mass",
+                "type": "slider",
+                "display_name": "Bob Mass (g)",
+                "default": 100,
+                "min": 50,
+                "max": 200,
+                "unit": "g",
+                "url_param": "mass"
+            }
+        ],
+        "auto_start_param": None,
+        "topic": "Oscillatory Motion & Time Period"
     }
 }
 
 
 # =============================================================================
 # DEFAULT SIMULATION
+# =============================================================================
 # =============================================================================
 DEFAULT_SIMULATION = "simple_pendulum"
 

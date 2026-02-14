@@ -17,7 +17,7 @@ class StartSessionRequest(BaseModel):
     """Request to start a new teaching session"""
     simulation_id: str = Field(
         ..., 
-        description="ID of simulation: 'simple_pendulum', 'earth_rotation_revolution', 'light_shadows', 'time_units', 'speed_race', 'speed_calculator', etc."
+        description="ID of simulation: 'simple_pendulum', 'simple_pendulum_new', 'earth_rotation_revolution', 'light_shadows', 'time_units', 'speed_race', 'speed_calculator', etc."
     )
     student_id: Optional[str] = Field(
         None, 
