@@ -347,6 +347,51 @@ SIMULATIONS = {
         ],
         "auto_start_param": None,
         "topic": "Time Units & SI Standards"
+    },
+    
+    "speed_calculator": {
+        "name": "Speed Calculator",
+        "description": "Calculate speed, distance, or time using the speed formula",
+        "base_url": f"{GITHUB_PAGES_BASE}/simulation_6_speed_calculator.html",
+        "parameters": [
+            {
+                "name": "calculationMode",
+                "display_name": "Calculation Mode",
+                "default": "speed",
+                "options": ["speed", "distance", "time"],
+                "option_labels": ["Find Speed", "Find Distance", "Find Time"],
+                "url_param": "calculationMode"
+            },
+            {
+                "name": "distance",
+                "display_name": "Distance (km)",
+                "default": 100,
+                "min": 1,
+                "max": 1000,
+                "unit": "km",
+                "url_param": "distance"
+            },
+            {
+                "name": "time",
+                "display_name": "Time (hours)",
+                "default": 2,
+                "min": 0.1,
+                "max": 100,
+                "unit": "h",
+                "url_param": "time"
+            },
+            {
+                "name": "speed",
+                "display_name": "Speed (km/h)",
+                "default": 50,
+                "min": 1,
+                "max": 1000,
+                "unit": "km/h",
+                "url_param": "speed"
+            }
+        ],
+        "auto_start_param": None,
+        "topic": "Speed, Distance & Time Relationships"
     }
 }
 

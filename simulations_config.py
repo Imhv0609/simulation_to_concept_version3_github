@@ -468,6 +468,101 @@ What can be demonstrated:
     ]
 }
 
+# =============================================================================
+# SPEED CALCULATOR SIMULATION
+# =============================================================================
+SIMULATIONS["speed_calculator"] = {
+    "title": "Speed Calculator",
+    "file": "simulations/simulation_6_speed_calculator.html",
+    "description": """
+An interactive calculator that helps students understand the relationship between speed, 
+distance, and time. Students can calculate any one variable when the other two are known, 
+reinforcing the formula Speed = Distance ÷ Time and its rearrangements.
+
+What can be demonstrated:
+- Speed calculation: Speed = Distance ÷ Time
+- Distance calculation: Distance = Speed × Time
+- Time calculation: Time = Distance ÷ Speed
+- Real-world speed values for different modes of transport
+- Unit conversion between km/h and m/s
+- Working steps showing the calculation process
+""",
+    "cannot_demonstrate": [
+        "Acceleration or changing speeds",
+        "Force or momentum calculations",
+        "Energy or power calculations",
+        "Relative motion or reference frames"
+    ],
+    "initial_params": {
+        "calculationMode": "speed",
+        "distance": 100,
+        "time": 2,
+        "speed": 50
+    },
+    "parameter_info": {
+        "calculationMode": {
+            "label": "Calculation Mode",
+            "range": "speed, distance, time",
+            "url_key": "calculationMode",
+            "effect": "Determines which variable to calculate: 'speed' (find speed), 'distance' (find distance), or 'time' (find time)"
+        },
+        "distance": {
+            "label": "Distance",
+            "range": "1-1000 km",
+            "min": 1,
+            "max": 1000,
+            "url_key": "distance",
+            "effect": "The distance traveled in kilometers (used when calculating speed or time)"
+        },
+        "time": {
+            "label": "Time",
+            "range": "0.1-100 hours",
+            "min": 0.1,
+            "max": 100,
+            "url_key": "time",
+            "effect": "The time taken in hours (used when calculating speed or distance)"
+        },
+        "speed": {
+            "label": "Speed",
+            "range": "1-1000 km/h",
+            "min": 1,
+            "max": 1000,
+            "url_key": "speed",
+            "effect": "The speed in kilometers per hour (used when calculating distance or time)"
+        }
+    },
+    "concepts": [
+        {
+            "id": 1,
+            "title": "Speed Formula and Its Meaning",
+            "description": "Understanding what speed is and how it relates to distance and time.",
+            "key_insight": "Speed = Distance ÷ Time. Speed tells us how fast something moves by showing how much distance is covered per unit of time",
+            "related_params": ["calculationMode", "distance", "time", "speed"]
+        },
+        {
+            "id": 2,
+            "title": "Calculating Speed from Distance and Time",
+            "description": "Learning to find speed when distance and time are known.",
+            "key_insight": "To find speed, divide distance by time. For example: 100 km ÷ 2 hours = 50 km/h. The object travels 50 km every hour",
+            "related_params": ["calculationMode", "distance", "time"]
+        },
+        {
+            "id": 3,
+            "title": "Rearranging the Formula for Distance",
+            "description": "Using the speed formula to find distance when speed and time are known.",
+            "key_insight": "Distance = Speed × Time. Multiply speed by time to find total distance. For example: 50 km/h × 3 hours = 150 km",
+            "related_params": ["calculationMode", "speed", "time"]
+        },
+        {
+            "id": 4,
+            "title": "Rearranging the Formula for Time",
+            "description": "Using the speed formula to find time when distance and speed are known.",
+            "key_insight": "Time = Distance ÷ Speed. Divide distance by speed to find time needed. For example: 200 km ÷ 100 km/h = 2 hours",
+            "related_params": ["calculationMode", "distance", "speed"]
+        }
+    ]
+}
+
 # ═══════════════════════════════════════════════════════════════════════
 # HELPER FUNCTIONS
 # ═══════════════════════════════════════════════════════════════════════
@@ -1256,6 +1351,128 @@ QUIZ_QUESTIONS["time_units"] = [
             "attempt_3": "Set timeValue to 10 and timeUnit to 's'. The result shows 10,000 milliseconds - Olympic races are decided by milliseconds!"
         },
         "concept_reminder": "1 second = 1000 milliseconds. This is why Olympic sprint times are often measured to the thousandth of a second (milliseconds) - because races are so close! 10 seconds = 10,000 milliseconds."
+    }
+]
+
+# =============================================================================
+# SPEED CALCULATOR QUIZ QUESTIONS
+# =============================================================================
+QUIZ_QUESTIONS["speed_calculator"] = [
+    {
+        "id": "calc_q1",
+        "challenge": "A car travels 150 km in 3 hours. Calculate the speed by setting calculationMode to 'speed', distance to 150, and time to 3.",
+        "target_parameters": ["calculationMode", "distance", "time"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "calculationMode", "operator": "==", "value": "speed"},
+                {"parameter": "distance", "operator": ">=", "value": 145},
+                {"parameter": "distance", "operator": "<=", "value": 155},
+                {"parameter": "time", "operator": ">=", "value": 2.8},
+                {"parameter": "time", "operator": "<=", "value": 3.2}
+            ],
+            "scoring": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"calculationMode": "speed", "distance_min": 148, "distance_max": 152, "time_min": 2.9, "time_max": 3.1},
+                "partial": {"calculationMode": "speed", "distance_min": 145, "distance_max": 155, "time_min": 2.8, "time_max": 3.2}
+            }
+        },
+        "hints": {
+            "attempt_1": "Select 'Find Speed' mode, then set distance to 150 km and time to 3 hours. The calculator will show: Speed = 150 ÷ 3 = 50 km/h.",
+            "attempt_2": "Speed = Distance ÷ Time. When distance is 150 km and time is 3 hours, speed = 150 ÷ 3 = 50 km/h.",
+            "attempt_3": "Set calculationMode to 'speed', distance to 150, and time to 3. The result shows 50 km/h!"
+        },
+        "concept_reminder": "To find speed, divide distance by time. Speed = Distance ÷ Time. This tells us how many kilometers are covered per hour. 150 km ÷ 3 h = 50 km/h."
+    },
+    {
+        "id": "calc_q2",
+        "challenge": "A train travels at 80 km/h for 4 hours. Find the distance traveled by switching to 'Find Distance' mode with speed 80 and time 4.",
+        "target_parameters": ["calculationMode", "speed", "time"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "calculationMode", "operator": "==", "value": "distance"},
+                {"parameter": "speed", "operator": ">=", "value": 75},
+                {"parameter": "speed", "operator": "<=", "value": 85},
+                {"parameter": "time", "operator": ">=", "value": 3.8},
+                {"parameter": "time", "operator": "<=", "value": 4.2}
+            ],
+            "scoring": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"calculationMode": "distance", "speed_min": 78, "speed_max": 82, "time_min": 3.9, "time_max": 4.1},
+                "partial": {"calculationMode": "distance", "speed_min": 75, "speed_max": 85, "time_min": 3.8, "time_max": 4.2}
+            }
+        },
+        "hints": {
+            "attempt_1": "Click 'Find Distance' tab, then set speed to 80 km/h and time to 4 hours. The formula is: Distance = Speed × Time.",
+            "attempt_2": "Distance = Speed × Time. When speed is 80 km/h and time is 4 hours, distance = 80 × 4 = 320 km.",
+            "attempt_3": "Set calculationMode to 'distance', speed to 80, and time to 4. The result shows 320 km!"
+        },
+        "concept_reminder": "To find distance, multiply speed by time. Distance = Speed × Time. If you travel at 80 km/h for 4 hours, you cover 80 × 4 = 320 km."
+    },
+    {
+        "id": "calc_q3",
+        "challenge": "You need to travel 360 km at a speed of 90 km/h. Calculate how long it will take by switching to 'Find Time' mode with distance 360 and speed 90.",
+        "target_parameters": ["calculationMode", "distance", "speed"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "calculationMode", "operator": "==", "value": "time"},
+                {"parameter": "distance", "operator": ">=", "value": 350},
+                {"parameter": "distance", "operator": "<=", "value": 370},
+                {"parameter": "speed", "operator": ">=", "value": 85},
+                {"parameter": "speed", "operator": "<=", "value": 95}
+            ],
+            "scoring": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"calculationMode": "time", "distance_min": 355, "distance_max": 365, "speed_min": 88, "speed_max": 92},
+                "partial": {"calculationMode": "time", "distance_min": 350, "distance_max": 370, "speed_min": 85, "speed_max": 95}
+            }
+        },
+        "hints": {
+            "attempt_1": "Click 'Find Time' tab, then set distance to 360 km and speed to 90 km/h. The formula is: Time = Distance ÷ Speed.",
+            "attempt_2": "Time = Distance ÷ Speed. When distance is 360 km and speed is 90 km/h, time = 360 ÷ 90 = 4 hours.",
+            "attempt_3": "Set calculationMode to 'time', distance to 360, and speed to 90. The result shows 4 hours!"
+        },
+        "concept_reminder": "To find time, divide distance by speed. Time = Distance ÷ Speed. At 90 km/h, covering 360 km takes 360 ÷ 90 = 4 hours."
+    },
+    {
+        "id": "calc_q4",
+        "challenge": "A cyclist wants to travel 60 km in exactly 2.5 hours. What speed is needed? Use 'Find Speed' mode with distance 60 and time 2.5.",
+        "target_parameters": ["calculationMode", "distance", "time"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "calculationMode", "operator": "==", "value": "speed"},
+                {"parameter": "distance", "operator": ">=", "value": 58},
+                {"parameter": "distance", "operator": "<=", "value": 62},
+                {"parameter": "time", "operator": ">=", "value": 2.3},
+                {"parameter": "time", "operator": "<=", "value": 2.7}
+            ],
+            "scoring": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"calculationMode": "speed", "distance_min": 59, "distance_max": 61, "time_min": 2.4, "time_max": 2.6},
+                "partial": {"calculationMode": "speed", "distance_min": 58, "distance_max": 62, "time_min": 2.3, "time_max": 2.7}
+            }
+        },
+        "hints": {
+            "attempt_1": "Select 'Find Speed' mode, then set distance to 60 km and time to 2.5 hours. Speed = Distance ÷ Time.",
+            "attempt_2": "Speed = 60 km ÷ 2.5 hours = 24 km/h. The cyclist needs to maintain 24 km/h to cover 60 km in 2.5 hours.",
+            "attempt_3": "Set calculationMode to 'speed', distance to 60, and time to 2.5. The result shows 24 km/h!"
+        },
+        "concept_reminder": "To find required speed, divide distance by available time. Speed = Distance ÷ Time. To travel 60 km in 2.5 hours, you need: 60 ÷ 2.5 = 24 km/h."
     }
 ]
     

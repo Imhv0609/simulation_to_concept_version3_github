@@ -25,6 +25,7 @@ try:
     )
     from state import create_initial_state, TeachingState
     from graph import continue_session, get_session_state
+    from langchain_core.runnables import RunnableConfig
     
     BACKEND_AVAILABLE = True
     
@@ -346,7 +347,8 @@ def submit_quiz_answer(thread_id: str, question_id: str, submitted_params: Dict[
     print("🔍 QUIZ EVALUATOR - Evaluating Submission")
     print("="*60)
     
-    eval_updates = quiz_evaluator_node(current_state)
+    # Create empty config for direct node invocation (outside graph context)
+    eval_updates = quiz_evaluator_node(current_state, config={})
     
     # Merge updates into state
     for key, value in eval_updates.items():
