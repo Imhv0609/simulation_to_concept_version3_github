@@ -397,7 +397,7 @@ SIMULATIONS = {
     "simple_pendulum_new": {
         "name": "Simple Pendulum Interactive",
         "description": "Explore how length and mass affect pendulum oscillations. Discover why time period depends only on length!",
-        "base_url": "simulations/simulation_3_pendulum.html",
+        "base_url": f"{GITHUB_PAGES_BASE}/simulation_3_pendulum.html",
         "parameters": [
             {
                 "name": "length",
