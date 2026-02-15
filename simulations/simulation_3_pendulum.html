@@ -567,6 +567,16 @@ if (window.location.search === '') {
   updateLength(100);
   updateMass(100);
 }
+
+// AUTO START: Check if we should auto-click the Start button
+const urlParams = new URLSearchParams(window.location.search);
+const autoStart = urlParams.get('autoStart');
+if (autoStart === 'true' || autoStart === '1') {
+  // Delay auto-start to let user see the parameters first
+  setTimeout(() => {
+    startPendulum();
+  }, 800); // 800ms delay so student sees parameters before simulation starts
+}
 </script>
 </body>
 </html>

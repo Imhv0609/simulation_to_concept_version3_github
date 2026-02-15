@@ -420,7 +420,7 @@ SIMULATIONS = {
                 "url_param": "mass"
             }
         ],
-        "auto_start_param": None,
+        "auto_start_param": "autoStart",
         "topic": "Oscillatory Motion & Time Period"
     }
 }
@@ -494,8 +494,8 @@ def build_simulation_url(sim_key: str, params: dict, auto_start: bool = True) ->
             
             query_parts.append(f"{url_name}={value}")
     
-    # Add auto-start if enabled
-    if auto_start and "auto_start_param" in config:
+    # Add auto-start if enabled and configured
+    if auto_start and config.get("auto_start_param"):
         query_parts.append(f"{config['auto_start_param']}=true")
     
     # Combine
