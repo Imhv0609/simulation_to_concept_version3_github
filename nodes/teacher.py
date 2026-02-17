@@ -264,11 +264,22 @@ def teacher_node(state: Dict[str, Any], config: RunnableConfig) -> Dict[str, Any
     
     cannot_demonstrate_str = "\n".join([f"- {item}" for item in CANNOT_DEMONSTRATE])
     
+    # Add problem examples if available (for simulations with multiple examples)
+    problem_examples_str = ""
+    if "problem_examples" in sim_config:
+        examples = sim_config["problem_examples"]
+        problem_examples_str = "\n\nAVAILABLE EXAMPLES (problemIndex):\n"
+        for ex in examples:
+            rule_emoji = "➖" if ex["rule"] == "minus" else "➕"
+            problem_examples_str += f"{rule_emoji} {ex['index']}: {ex['expression']} = {ex['result'].split('=')[0].strip()} ({ex['rule'].upper()} before bracket)\n"
+        problem_examples_str += "\n⚠️ CRITICAL: Always check this list to know which problemIndex shows which rule!"
+    
     # Build the teaching prompt
     system_prompt = f"""You are a warm, engaging science teacher named Alex. You're teaching a student about {TOPIC_TITLE} through an interactive simulation.
 
 TOPIC DETAILS:
 {TOPIC_DESCRIPTION}
+{problem_examples_str}
 
 ⚠️ CRITICAL: You MUST respond with ONLY a valid JSON object. No extra text before or after.
 Your response must start with {{ and end with }}.

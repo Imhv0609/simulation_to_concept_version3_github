@@ -687,6 +687,18 @@ What can be demonstrated:
             "effect": "In Learn mode: selects which example to display (10 examples total). Different examples show various cases of sign flipping and keeping"
         }
     },
+    "problem_examples": [
+        {"index": 0, "expression": "200 − (40 + 3)", "result": "200 − 40 − 3 = 157", "rule": "minus", "explanation": "Minus before bracket → signs flip"},
+        {"index": 1, "expression": "500 − (250 − 100)", "result": "500 − 250 + 100 = 350", "rule": "minus", "explanation": "Minus before bracket → signs flip (tricky: −100 becomes +100)"},
+        {"index": 2, "expression": "100 − (15 + 56)", "result": "100 − 15 − 56 = 29", "rule": "minus", "explanation": "Minus before bracket → signs flip"},
+        {"index": 3, "expression": "28 + (35 − 10)", "result": "28 + 35 − 10 = 53", "rule": "plus", "explanation": "Plus before bracket → signs stay the same"},
+        {"index": 4, "expression": "24 + (6 − 4)", "result": "24 + 6 − 4 = 26", "rule": "plus", "explanation": "Plus before bracket → signs stay the same"},
+        {"index": 5, "expression": "24 − (6 + 4)", "result": "24 − 6 − 4 = 14", "rule": "minus", "explanation": "Minus before bracket → signs flip"},
+        {"index": 6, "expression": "27 − (8 + 3)", "result": "27 − 8 − 3 = 16", "rule": "minus", "explanation": "Minus before bracket → signs flip"},
+        {"index": 7, "expression": "27 − (8 − 3)", "result": "27 − 8 + 3 = 22", "rule": "minus", "explanation": "Minus before bracket → both signs flip"},
+        {"index": 8, "expression": "14 − (12 − 10)", "result": "14 − 12 + 10 = 12", "rule": "minus", "explanation": "Minus before bracket → both signs flip"},
+        {"index": 9, "expression": "14 − (−12 − 10)", "result": "14 + 12 + 10 = 36", "rule": "minus", "explanation": "Minus before bracket → negative numbers become positive"}
+    ],
     "concepts": [
         {
             "id": 1,
