@@ -642,6 +642,83 @@ What can be demonstrated:
     ]
 }
 
+# =============================================================================
+# BRACKETS & SIGN RULES SIMULATION
+# =============================================================================
+SIMULATIONS["brackets_signs"] = {
+    "title": "Brackets & Sign Rules",
+    "file": "simulations/ch2_sim2_brackets_signs.html",
+    "description": """
+An interactive simulation teaching the fundamental rules of bracket removal in algebra.
+Students learn when to flip signs and when to keep them based on what comes before the brackets.
+
+What can be demonstrated:
+- Removing brackets when preceded by a minus sign (signs flip)
+- Removing brackets when preceded by a plus sign (signs stay same)
+- Step-by-step explanation of sign changes
+- Multiple examples with varying complexity
+- Quiz mode to test understanding
+- Real arithmetic evaluation showing both forms are equal
+""",
+    "cannot_demonstrate": [
+        "Multiplication of brackets (distributive property)",
+        "Nested brackets (brackets within brackets)",
+        "Algebraic expressions with variables",
+        "Brackets with coefficients (e.g., 2(x + 3))"
+    ],
+    "initial_params": {
+        "mode": "learn",
+        "problemIndex": 0
+    },
+    "parameter_info": {
+        "mode": {
+            "label": "Mode",
+            "range": "learn or quiz",
+            "options": ["learn", "quiz"],
+            "url_key": "mode",
+            "effect": "Learn mode shows examples with step-by-step explanations. Quiz mode tests understanding with multiple choice questions"
+        },
+        "problemIndex": {
+            "label": "Problem/Example Number",
+            "range": "0-9",
+            "min": 0,
+            "max": 9,
+            "url_key": "problemIndex",
+            "effect": "In Learn mode: selects which example to display (10 examples total). Different examples show various cases of sign flipping and keeping"
+        }
+    },
+    "concepts": [
+        {
+            "id": 1,
+            "title": "Understanding Brackets in Arithmetic",
+            "description": "Learning what brackets represent and why we need rules to remove them.",
+            "key_insight": "Brackets group terms together. When we remove brackets, we must follow specific rules to maintain the expression's value. The sign before the bracket determines what happens to signs inside",
+            "related_params": ["mode", "problemIndex"]
+        },
+        {
+            "id": 2,
+            "title": "The Minus-Before-Bracket Rule",
+            "description": "Discovering that a minus sign before brackets flips all signs inside.",
+            "key_insight": "When there's a MINUS before brackets, every sign inside FLIPS: + becomes −, and − becomes +. Example: 100 − (40 + 3) = 100 − 40 − 3. This is because we're subtracting everything in the brackets",
+            "related_params": ["problemIndex"]
+        },
+        {
+            "id": 3,
+            "title": "The Plus-Before-Bracket Rule",
+            "description": "Understanding that a plus sign before brackets means signs stay the same.",
+            "key_insight": "When there's a PLUS before brackets, signs inside STAY THE SAME: just remove the brackets. Example: 28 + (35 − 10) = 28 + 35 − 10. Adding a group doesn't change the signs",
+            "related_params": ["problemIndex"]
+        },
+        {
+            "id": 4,
+            "title": "Why Signs Flip - The Logic Behind It",
+            "description": "Understanding the mathematical reasoning for sign changes.",
+            "key_insight": "Subtracting a sum means subtracting each part. Subtracting a difference means subtract the first but ADD the second (you subtracted too much!). Example: 500 − (250 − 100) = 500 − 250 + 100, because you need to add back the 100 you removed",
+            "related_params": ["problemIndex"]
+        }
+    ]
+}
+
 # ═══════════════════════════════════════════════════════════════════════
 # HELPER FUNCTIONS
 # ═══════════════════════════════════════════════════════════════════════
@@ -1676,6 +1753,127 @@ QUIZ_QUESTIONS["simple_pendulum_new"] = [
             "attempt_3": "Drag the length slider to maximum (200 cm). Notice the very slow oscillations!"
         },
         "concept_reminder": "The longest pendulum (200 cm) has the longest time period. Length and period follow T = 2π√(L/g). Doubling length increases period by √2 ≈ 1.41 times."
+    }
+]
+
+# =============================================================================
+# BRACKETS & SIGN RULES - QUIZ QUESTIONS
+# =============================================================================
+QUIZ_QUESTIONS["brackets_signs"] = [
+    {
+        "id": "brackets_q1",
+        "challenge": "Let's start by examining a basic case where MINUS comes before the bracket. Look at the first example (200 − (40 + 3)) which shows how signs flip.",
+        "target_parameters": ["mode", "problemIndex"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "mode", "operator": "==", "value": "learn"},
+                {"parameter": "problemIndex", "operator": "==", "value": 0}
+            ],
+            "logic": "ALL"
+        },
+        "scoring": {
+            "weights": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"mode": "learn", "problemIndex": 0},
+                "partial": {"mode": "learn"}
+            }
+        },
+        "hints": {
+            "attempt_1": "Make sure you're in 'Learn' mode (not Quiz mode) and the slider or presets show the first example: 200 − (40 + 3).",
+            "attempt_2": "Click the 'Learn' tab at the top if you're in Quiz mode. The first example demonstrates the minus-before-bracket rule.",
+            "attempt_3": "Set mode to 'learn' and select problem 0 (the first example). This shows: 200 − (40 + 3) = 200 − 40 − 3 = 157."
+        },
+        "concept_reminder": "When MINUS comes before the bracket, all signs inside FLIP: +40 becomes −40, +3 becomes −3. This is the fundamental rule of bracket removal."
+    },
+    {
+        "id": "brackets_q2",
+        "challenge": "Now examine example 4 (28 + (35 − 10)) which shows the PLUS-before-bracket case. Notice how signs STAY THE SAME when there's a plus before the bracket.",
+        "target_parameters": ["mode", "problemIndex"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "mode", "operator": "==", "value": "learn"},
+                {"parameter": "problemIndex", "operator": "==", "value": 3}
+            ],
+            "logic": "ALL"
+        },
+        "scoring": {
+            "weights": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"mode": "learn", "problemIndex": 3},
+                "partial": {"mode": "learn"}
+            }
+        },
+        "hints": {
+            "attempt_1": "Stay in Learn mode and select example 4 (the slider should be at position 3, or click the '28 + (35 − 10)' preset button).",
+            "attempt_2": "Use the 'Expression' slider to move to problem 4 (position 3 on the slider: 0, 1, 2, 3...). Or click the preset button showing this expression.",
+            "attempt_3": "Problem index 3 shows: 28 + (35 − 10) = 28 + 35 − 10 = 53. Plus before bracket means signs stay the same!"
+        },
+        "concept_reminder": "When PLUS comes before the bracket, signs inside STAY THE SAME: just remove the brackets. +35 stays +35, −10 stays −10."
+    },
+    {
+        "id": "brackets_q3",
+        "challenge": "Look at the tricky case in example 2 (500 − (250 − 100)). This shows why understanding sign flipping is crucial: both signs flip, so −100 becomes +100!",
+        "target_parameters": ["mode", "problemIndex"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "mode", "operator": "==", "value": "learn"},
+                {"parameter": "problemIndex", "operator": "==", "value": 1}
+            ],
+            "logic": "ALL"
+        },
+        "scoring": {
+            "weights": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"mode": "learn", "problemIndex": 1},
+                "partial": {"mode": "learn"}
+            }
+        },
+        "hints": {
+            "attempt_1": "Select example 2 (problem index 1) in Learn mode. This is the classic case: 500 − (250 − 100).",
+            "attempt_2": "Move the slider to position 1, or click the '500 − (250 − 100)' preset button.",
+            "attempt_3": "Problem 1 shows: 500 − (250 − 100) = 500 − 250 + 100 = 350. Because of the minus before bracket, +250→−250 AND −100→+100!"
+        },
+        "concept_reminder": "Subtracting a difference requires careful attention: the minus before bracket flips BOTH signs. This is why −100 becomes +100 (you need to add back what you over-subtracted)."
+    },
+    {
+        "id": "brackets_q4",
+        "challenge": "Now test your understanding! Switch to Quiz mode and try answering the multiple choice questions. This will help solidify your knowledge of bracket removal rules.",
+        "target_parameters": ["mode"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "mode", "operator": "==", "value": "quiz"}
+            ],
+            "logic": "ALL"
+        },
+        "scoring": {
+            "weights": {
+                "perfect": 1.0,
+                "partial": 0.5,
+                "wrong": 0.2
+            },
+            "thresholds": {
+                "perfect": {"mode": "quiz"},
+                "partial": {}
+            }
+        },
+        "hints": {
+            "attempt_1": "Click the 'Quiz' tab at the top of the simulation to switch from Learn mode to Quiz mode.",
+            "attempt_2": "Look for the mode tabs near the top - click 'Quiz' to enter quiz mode where you can test yourself.",
+            "attempt_3": "Switch to Quiz mode by clicking the Quiz tab. You'll get multiple choice questions to practice bracket removal!"
+        },
+        "concept_reminder": "Quiz mode tests your understanding with random questions. Remember: MINUS before bracket → signs FLIP; PLUS before bracket → signs STAY."
     }
 ]
     

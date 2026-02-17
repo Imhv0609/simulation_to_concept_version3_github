@@ -422,6 +422,35 @@ SIMULATIONS = {
         ],
         "auto_start_param": "autoStart",
         "topic": "Oscillatory Motion & Time Period"
+    },
+    
+    "brackets_signs": {
+        "name": "Brackets & Sign Rules",
+        "description": "Learn when to flip signs and when to keep them when removing brackets in algebra",
+        "base_url": f"{GITHUB_PAGES_BASE}/ch2_sim2_brackets_signs.html",
+        "parameters": [
+            {
+                "name": "mode",
+                "type": "select",
+                "display_name": "Mode",
+                "default": "learn",
+                "options": ["learn", "quiz"],
+                "option_labels": ["Learn (Examples)", "Quiz (Test Yourself)"],
+                "url_param": "mode"
+            },
+            {
+                "name": "problemIndex",
+                "type": "slider",
+                "display_name": "Example Number",
+                "default": 0,
+                "min": 0,
+                "max": 9,
+                "unit": "",
+                "url_param": "problemIndex"
+            }
+        ],
+        "auto_start_param": None,
+        "topic": "Algebra - Brackets & Sign Rules"
     }
 }
 
