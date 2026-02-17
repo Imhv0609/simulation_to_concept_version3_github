@@ -451,6 +451,75 @@ SIMULATIONS = {
         ],
         "auto_start_param": None,
         "topic": "Algebra - Brackets & Sign Rules"
+    },
+    
+    "distributive": {
+        "name": "Distributive Property",
+        "description": "Understand a × (b + c) = a × b + a × c through dot arrays, area models, and mental math",
+        "base_url": f"{GITHUB_PAGES_BASE}/ch2_sim3_distributive.html",
+        "parameters": [
+            {
+                "name": "mode",
+                "type": "select",
+                "display_name": "Visualization Mode",
+                "default": "dots",
+                "options": ["dots", "area", "mental", "quiz"],
+                "option_labels": ["Dot Array", "Area Model", "Mental Math", "Quiz"],
+                "url_param": "mode"
+            },
+            {
+                "name": "a",
+                "type": "slider",
+                "display_name": "a (rows/multiplier)",
+                "default": 3,
+                "min": 1,
+                "max": 8,
+                "unit": "",
+                "url_param": "a"
+            },
+            {
+                "name": "b",
+                "type": "slider",
+                "display_name": "b (blue columns/first addend)",
+                "default": 4,
+                "min": 1,
+                "max": 10,
+                "unit": "",
+                "url_param": "b"
+            },
+            {
+                "name": "c",
+                "type": "slider",
+                "display_name": "c (green columns/second addend)",
+                "default": 6,
+                "min": 1,
+                "max": 10,
+                "unit": "",
+                "url_param": "c"
+            },
+            {
+                "name": "mentalMathIndex",
+                "type": "slider",
+                "display_name": "Mental Math Example",
+                "default": 0,
+                "min": 0,
+                "max": 4,
+                "unit": "",
+                "url_param": "mentalMathIndex"
+            },
+            {
+                "name": "quizIndex",
+                "type": "slider",
+                "display_name": "Quiz Question",
+                "default": 0,
+                "min": 0,
+                "max": 9,
+                "unit": "",
+                "url_param": "quizIndex"
+            }
+        ],
+        "auto_start_param": None,
+        "topic": "Algebra - Distributive Property"
     }
 }
 

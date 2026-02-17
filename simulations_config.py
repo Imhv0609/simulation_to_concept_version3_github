@@ -731,6 +731,148 @@ What can be demonstrated:
     ]
 }
 
+# ---------------------------------------------------------------------------
+# DISTRIBUTIVE PROPERTY SIMULATION
+# ---------------------------------------------------------------------------
+
+SIMULATIONS["distributive"] = {
+    "id": "distributive",
+    "title": "Distributive Property",
+    "description": "Understand the distributive property: a × (b + c) = a × b + a × c through multiple visual representations and mental math applications",
+    "url": "https://imhv0609.github.io/simulation_to_concept_version3_github/simulations/ch2_sim3_distributive.html",
+    "parameters": [
+        {
+            "name": "mode",
+            "type": "select",
+            "description": "Visualization/teaching mode",
+            "options": ["dots", "area", "mental", "quiz"],
+            "default": "dots",
+            "range": None
+        },
+        {
+            "name": "a",
+            "type": "number",
+            "description": "Number of rows in the array (multiplier)",
+            "options": None,
+            "default": 3,
+            "range": {"min": 1, "max": 8, "step": 1}
+        },
+        {
+            "name": "b",
+            "type": "number",
+            "description": "Number of blue columns (first addend)",
+            "options": None,
+            "default": 4,
+            "range": {"min": 1, "max": 10, "step": 1}
+        },
+        {
+            "name": "c",
+            "type": "number",
+            "description": "Number of green columns (second addend)",
+            "options": None,
+            "default": 6,
+            "range": {"min": 1, "max": 10, "step": 1}
+        },
+        {
+            "name": "mentalMathIndex",
+            "type": "number",
+            "description": "Which mental math example to show (0-4)",
+            "options": None,
+            "default": 0,
+            "range": {"min": 0, "max": 4, "step": 1}
+        },
+        {
+            "name": "quizIndex",
+            "type": "number",
+            "description": "Quiz question index (0-9)",
+            "options": None,
+            "default": 0,
+            "range": {"min": 0, "max": 9, "step": 1}
+        }
+    ],
+    "mental_math_examples": [
+        {
+            "index": 0,
+            "problem": "97 × 25",
+            "decomposition": "(100 − 3) × 25",
+            "explanation": "Break 97 into 100 − 3, then distribute: 100×25 − 3×25 = 2500 − 75 = 2425",
+            "result": 2425
+        },
+        {
+            "index": 1,
+            "problem": "95 × 8",
+            "decomposition": "(100 − 5) × 8",
+            "explanation": "Break 95 into 100 − 5, then distribute: 100×8 − 5×8 = 800 − 40 = 760",
+            "result": 760
+        },
+        {
+            "index": 2,
+            "problem": "104 × 15",
+            "decomposition": "(100 + 4) × 15",
+            "explanation": "Break 104 into 100 + 4, then distribute: 100×15 + 4×15 = 1500 + 60 = 1560",
+            "result": 1560
+        },
+        {
+            "index": 3,
+            "problem": "49 × 50",
+            "decomposition": "(50 − 1) × 50",
+            "explanation": "Break 49 into 50 − 1, then distribute: 50×50 − 1×50 = 2500 − 50 = 2450",
+            "result": 2450
+        },
+        {
+            "index": 4,
+            "problem": "998 × 7",
+            "decomposition": "(1000 − 2) × 7",
+            "explanation": "Break 998 into 1000 − 2, then distribute: 1000×7 − 2×7 = 7000 − 14 = 6986",
+            "result": 6986
+        }
+    ],
+    "concepts": [
+        {
+            "id": 1,
+            "title": "Understanding the Distributive Property",
+            "description": "The fundamental rule: multiplying a sum equals the sum of the individual products.",
+            "key_insight": "The distributive property states: a × (b + c) = a × b + a × c. This means when you multiply a number by a sum, you can either: 1) Add first, then multiply, OR 2) Multiply each addend separately, then add the products. Both give the same answer!",
+            "related_params": ["a", "b", "c"]
+        },
+        {
+            "id": 2,
+            "title": "Dot Array Visualization",
+            "description": "Understanding distributive property through arranged dots in rows and columns.",
+            "key_insight": "In dot array mode, you see 'a' rows with (b + c) columns. The dots split into BLUE (a rows × b columns) and GREEN (a rows × c columns). Total dots = a × (b + c) = (a × b) + (a × c). Example: 3 rows of 10 dots (4 blue + 6 green) = 3×10 = 3×4 + 3×6 = 12 + 18 = 30 dots",
+            "related_params": ["mode", "a", "b", "c"]
+        },
+        {
+            "id": 3,
+            "title": "Area Model Visualization",
+            "description": "Understanding distributive property through rectangle areas divided into sections.",
+            "key_insight": "In area model mode, a rectangle with height 'a' and width (b + c) splits into two smaller rectangles: BLUE area = a × b square units, GREEN area = a × c square units. Total area = a × (b + c) = (a × b) + (a × c). Example: A 4×9 rectangle splits into 4×5=20 blue squares plus 4×4=16 green squares = 36 total",
+            "related_params": ["mode", "a", "b", "c"]
+        },
+        {
+            "id": 4,
+            "title": "Mental Math with Distributive Property",
+            "description": "Using the distributive property to make multiplication easier by breaking numbers into friendlier parts.",
+            "key_insight": "The distributive property enables mental math shortcuts! Break hard numbers into easy ones near multiples of 10, 100, or 1000. Example: 97×25 seems hard, but think '97 = 100 − 3', so 97×25 = (100−3)×25 = 100×25 − 3×25 = 2500 − 75 = 2425. Works with addition too: 104×15 = (100+4)×15 = 1500 + 60 = 1560",
+            "related_params": ["mode", "mentalMathIndex"]
+        },
+        {
+            "id": 5,
+            "title": "Distributive Property with Subtraction",
+            "description": "The distributive property works with subtraction too: a × (b − c) = a × b − a × c",
+            "key_insight": "Subtraction distributes just like addition! When you have a × (b − c), multiply both parts: a × b minus a × c. Example: 5 × (9 − 2) = 5 × 9 − 5 × 2 = 45 − 10 = 35. This is the same as 5 × 7 = 35. The property works whether you add or subtract inside the brackets",
+            "related_params": ["mode", "mentalMathIndex"]
+        },
+        {
+            "id": 6,
+            "title": "Why It Works - The Mathematical Reason",
+            "description": "Understanding why the distributive property is always true.",
+            "key_insight": "Imagine buying 'a' bags, each containing 'b' red candies and 'c' blue candies. Total candies = a × (b + c). But you could also count: red candies = a × b, blue candies = a × c, then add them. It's the same total! The property works because multiplication represents repeated addition, and order doesn't matter in addition",
+            "related_params": ["a", "b", "c"]
+        }
+    ]
+}
+
 # ═══════════════════════════════════════════════════════════════════════
 # HELPER FUNCTIONS
 # ═══════════════════════════════════════════════════════════════════════
@@ -1886,6 +2028,250 @@ QUIZ_QUESTIONS["brackets_signs"] = [
             "attempt_3": "Switch to Quiz mode by clicking the Quiz tab. You'll get multiple choice questions to practice bracket removal!"
         },
         "concept_reminder": "Quiz mode tests your understanding with random questions. Remember: MINUS before bracket → signs FLIP; PLUS before bracket → signs STAY."
+    }
+]
+
+# =============================================================================
+# DISTRIBUTIVE PROPERTY - QUIZ QUESTIONS
+# =============================================================================
+QUIZ_QUESTIONS["distributive"] = [
+    {
+        "id": "distributive_q1",
+        "challenge": "Let's explore the dot array visualization. Set mode to 'dots' with a=2, b=3, c=5. Count the blue and green dots to see how they add up to the total.",
+        "target_parameters": ["mode", "a", "b", "c"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "mode", "operator": "==", "value": "dots"},
+                {"parameter": "a", "operator": "==", "value": 2},
+                {"parameter": "b", "operator": "==", "value": 3},
+                {"parameter": "c", "operator": "==", "value": 5}
+            ],
+            "logic": "ALL"
+        },
+        "scoring": {
+            "weights": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"mode": "dots", "a": 2, "b": 3, "c": 5},
+                "partial": {"mode": "dots"}
+            }
+        },
+        "hints": {
+            "attempt_1": "Click the 'Dot Array' tab, then set the sliders: a (rows) = 2, b (blue columns) = 3, c (green columns) = 5.",
+            "attempt_2": "You should see 2 rows with 3 blue dots and 5 green dots in each row. That's 2×(3+5) = 2×8 = 16 dots total!",
+            "attempt_3": "Set a=2, b=3, c=5 in Dot Array mode. You'll see: 2×3 = 6 blue dots, 2×5 = 10 green dots, total = 16 dots. This shows 2×(3+5) = 2×3 + 2×5."
+        },
+        "concept_reminder": "The dot array shows how a×(b+c) splits visually: 'a' rows of 'b' blue dots plus 'a' rows of 'c' green dots. Total = a×b + a×c."
+    },
+    {
+        "id": "distributive_q2",
+        "challenge": "Switch to 'area' mode to see the same concept as a rectangle split into two colored sections. Keep a=2, b=3, c=5 to see the area model.",
+        "target_parameters": ["mode", "a", "b", "c"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "mode", "operator": "==", "value": "area"},
+                {"parameter": "a", "operator": "==", "value": 2},
+                {"parameter": "b", "operator": "==", "value": 3},
+                {"parameter": "c", "operator": "==", "value": 5}
+            ],
+            "logic": "ALL"
+        },
+        "scoring": {
+            "weights": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"mode": "area", "a": 2, "b": 3, "c": 5},
+                "partial": {"mode": "area"}
+            }
+        },
+        "hints": {
+            "attempt_1": "Click the 'Area Model' tab while keeping a=2, b=3, c=5. You'll see a rectangle divided into blue and green sections.",
+            "attempt_2": "The area model shows a 2×8 rectangle split into: blue section (2×3=6 squares) + green section (2×5=10 squares) = 16 total.",
+            "attempt_3": "Switch to Area Model mode. The rectangle has height 2 and width 8 (3+5), with blue area=6 and green area=10. Same distributive property, different visualization!"
+        },
+        "concept_reminder": "The area model demonstrates that a rectangle of dimensions a × (b+c) equals the sum of two rectangles: a×b plus a×c. Both visualizations prove the same algebraic truth."
+    },
+    {
+        "id": "distributive_q3",
+        "challenge": "Now try a larger example to see the pattern holds. Set a=4, b=6, c=7 in either dots or area mode. Notice how the blue and green parts add up correctly.",
+        "target_parameters": ["a", "b", "c"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "a", "operator": "==", "value": 4},
+                {"parameter": "b", "operator": "==", "value": 6},
+                {"parameter": "c", "operator": "==", "value": 7}
+            ],
+            "logic": "ALL"
+        },
+        "scoring": {
+            "weights": {
+                "perfect": 1.0,
+                "partial": 0.7,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"a": 4, "b": 6, "c": 7},
+                "partial": {"a": 4}
+            }
+        },
+        "hints": {
+            "attempt_1": "Set the sliders to a=4, b=6, c=7. This gives you 4×(6+7) = 4×13 = 52 total.",
+            "attempt_2": "You should see: blue part = 4×6 = 24, green part = 4×7 = 28, total = 52. The equation is 4×(6+7) = 4×6 + 4×7.",
+            "attempt_3": "With a=4, b=6, c=7, the visualization shows 52 dots or 52 square units: 24 blue + 28 green. This demonstrates the distributive property with larger numbers."
+        },
+        "concept_reminder": "The distributive property works for any numbers, not just small ones! Whether 2×(3+5) or 4×(6+7), the rule a×(b+c) = a×b + a×c always holds."
+    },
+    {
+        "id": "distributive_q4",
+        "challenge": "Let's explore mental math! Switch to 'mental' mode and select the first example (97 × 25) to see how distributive property makes hard multiplication easier.",
+        "target_parameters": ["mode", "mentalMathIndex"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "mode", "operator": "==", "value": "mental"},
+                {"parameter": "mentalMathIndex", "operator": "==", "value": 0}
+            ],
+            "logic": "ALL"
+        },
+        "scoring": {
+            "weights": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"mode": "mental", "mentalMathIndex": 0},
+                "partial": {"mode": "mental"}
+            }
+        },
+        "hints": {
+            "attempt_1": "Click the 'Mental Math' tab, then select the first button showing '97×25'.",
+            "attempt_2": "97×25 seems hard, but 97 = 100 − 3, so we can compute: (100−3)×25 = 100×25 − 3×25 = 2500 − 75 = 2425!",
+            "attempt_3": "Select mental math example 0 (97×25). The steps show decomposition into (100−3)×25, then distribution: 2500 − 75 = 2425."
+        },
+        "concept_reminder": "Mental math uses distributive property to break hard numbers into easy ones. 97 is close to 100, so we compute with 100 and subtract the difference. This is the power of a×(b−c) = a×b − a×c!"
+    },
+    {
+        "id": "distributive_q5",
+        "challenge": "Try another mental math example: 104 × 15 (example index 2). This one uses ADDITION instead of subtraction. See how 104 = 100 + 4 makes it easier.",
+        "target_parameters": ["mode", "mentalMathIndex"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "mode", "operator": "==", "value": "mental"},
+                {"parameter": "mentalMathIndex", "operator": "==", "value": 2}
+            ],
+            "logic": "ALL"
+        },
+        "scoring": {
+            "weights": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"mode": "mental", "mentalMathIndex": 2},
+                "partial": {"mode": "mental"}
+            }
+        },
+        "hints": {
+            "attempt_1": "In Mental Math mode, click the third button showing '104×15' (that's index 2: the examples go 0, 1, 2...).",
+            "attempt_2": "104 = 100 + 4, so: (100+4)×15 = 100×15 + 4×15 = 1500 + 60 = 1560. Much easier than multiplying 104×15 directly!",
+            "attempt_3": "Select example 2 (104×15). The decomposition shows (100+4)×15 = 1500 + 60 = 1560. This demonstrates a×(b+c) = a×b + a×c with real numbers."
+        },
+        "concept_reminder": "The distributive property works with both addition and subtraction! 104 is slightly over 100, so we add the extra: (100+4)×15 = 100×15 + 4×15."
+    },
+    {
+        "id": "distributive_q6",
+        "challenge": "Test your understanding! Switch to Quiz mode to answer questions about filling in missing operators and numbers in distributive equations.",
+        "target_parameters": ["mode"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "mode", "operator": "==", "value": "quiz"}
+            ],
+            "logic": "ALL"
+        },
+        "scoring": {
+            "weights": {
+                "perfect": 1.0,
+                "partial": 0.5,
+                "wrong": 0.2
+            },
+            "thresholds": {
+                "perfect": {"mode": "quiz"},
+                "partial": {}
+            }
+        },
+        "hints": {
+            "attempt_1": "Click the 'Quiz' tab at the top to switch to quiz mode and test yourself with multiple choice questions.",
+            "attempt_2": "Quiz mode will ask you to fill in missing operators (+, −, ×) or numbers. Use what you learned from the visualizations!",
+            "attempt_3": "Switch to Quiz mode to practice. Remember: when you distribute over addition, use +; when you distribute over subtraction, use −."
+        },
+        "concept_reminder": "The quiz tests whether you understand: 1) What operator to use when distributing (+ or −), 2) Which number distributes to each term, 3) How to decompose numbers for mental math."
+    },
+    {
+        "id": "distributive_q7",
+        "challenge": "Back to dot array mode: try setting a=3, b=4, c=4 to see a symmetrical pattern where the blue and green parts are equal.",
+        "target_parameters": ["mode", "a", "b", "c"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "mode", "operator": "==", "value": "dots"},
+                {"parameter": "a", "operator": "==", "value": 3},
+                {"parameter": "b", "operator": "==", "value": 4},
+                {"parameter": "c", "operator": "==", "value": 4}
+            ],
+            "logic": "ALL"
+        },
+        "scoring": {
+            "weights": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"mode": "dots", "a": 3, "b": 4, "c": 4},
+                "partial": {"mode": "dots", "b": 4, "c": 4}
+            }
+        },
+        "hints": {
+            "attempt_1": "Go back to Dot Array mode and set a=3, b=4, c=4. You'll see equal numbers of blue and green dots.",
+            "attempt_2": "With b=c=4, you get 3×4 = 12 blue dots and 3×4 = 12 green dots. Total = 24 dots. Notice the symmetry!",
+            "attempt_3": "Set a=3, b=4, c=4. This shows 3×(4+4) = 3×8 = 24, which equals 3×4 + 3×4 = 12 + 12. When b=c, the parts are equal!"
+        },
+        "concept_reminder": "When b equals c, the distributive property shows: a×(b+c) = a×b + a×c = a×b + a×b = 2×(a×b). This is a special symmetric case."
+    },
+    {
+        "id": "distributive_q8",
+        "challenge": "Explore the most complex mental math example: 998 × 7 (example index 4). This uses a very large decomposition: 998 = 1000 − 2.",
+        "target_parameters": ["mode", "mentalMathIndex"],
+        "success_rule": {
+            "conditions": [
+                {"parameter": "mode", "operator": "==", "value": "mental"},
+                {"parameter": "mentalMathIndex", "operator": "==", "value": 4}
+            ],
+            "logic": "ALL"
+        },
+        "scoring": {
+            "weights": {
+                "perfect": 1.0,
+                "partial": 0.6,
+                "wrong": 0.3
+            },
+            "thresholds": {
+                "perfect": {"mode": "mental", "mentalMathIndex": 4},
+                "partial": {"mode": "mental"}
+            }
+        },
+        "hints": {
+            "attempt_1": "In Mental Math mode, click the last button (fifth one) showing '998×7'. That's example index 4.",
+            "attempt_2": "998 is very close to 1000, so: 998 = 1000 − 2. Then (1000−2)×7 = 1000×7 − 2×7 = 7000 − 14 = 6986!",
+            "attempt_3": "Select example 4 (998×7). Decomposition: (1000−2)×7 = 7000 − 14 = 6986. This shows how powerful the distributive property is for mental calculation!"
+        },
+        "concept_reminder": "Even with very large numbers, the distributive property makes mental math possible. 998×7 looks hard, but thinking '1000−2' makes it: 7000 − 14 = 6986. Simple!"
     }
 ]
     
