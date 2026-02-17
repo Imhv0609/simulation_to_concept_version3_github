@@ -318,7 +318,7 @@ SIMULATIONS = {
                 "url_param": "speedTrain"
             }
         ],
-        "auto_start_param": None,
+        "auto_start_param": "autoStart",
         "topic": "Speed, Distance & Time"
     },
     

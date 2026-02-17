@@ -489,6 +489,16 @@ function resetRace() {
   document.getElementById('results-panel').style.display = 'none';
   document.getElementById('calc-box').style.display = 'none';
 }
+
+// AUTO START: Check if we should auto-click the Start button
+const urlParams = new URLSearchParams(window.location.search);
+const autoStart = urlParams.get('autoStart');
+if (autoStart === 'true' || autoStart === '1') {
+  // Delay auto-start to let user see the parameters first
+  setTimeout(() => {
+    startRace();
+  }, 800); // 800ms delay so student sees parameters before race starts
+}
 </script>
 </body>
 </html>
