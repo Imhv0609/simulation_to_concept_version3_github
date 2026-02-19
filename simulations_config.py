@@ -738,8 +738,73 @@ What can be demonstrated:
 SIMULATIONS["distributive"] = {
     "id": "distributive",
     "title": "Distributive Property",
+    "file": "simulations/ch2_sim3_distributive.html",
     "description": "Understand the distributive property: a × (b + c) = a × b + a × c through multiple visual representations and mental math applications",
     "url": "https://imhv0609.github.io/simulation_to_concept_version3_github/simulations/ch2_sim3_distributive.html",
+    "cannot_demonstrate": [
+        "Factoring expressions (reverse of distributive property)",
+        "Distributive property with division",
+        "Distributive property with three or more terms inside brackets",
+        "Algebraic expressions with variables only (this uses concrete numbers)",
+        "FOIL method for binomial multiplication"
+    ],
+    "initial_params": {
+        "mode": "dots",
+        "a": 3,
+        "b": 4,
+        "c": 6,
+        "mentalMathIndex": 0,
+        "quizIndex": 0
+    },
+    "parameter_info": {
+        "mode": {
+            "label": "Visualization Mode",
+            "range": "dots, area, mental, or quiz",
+            "options": ["dots", "area", "mental", "quiz"],
+            "url_key": "mode",
+            "effect": "dots: Visual dot array showing a×(b+c) split into colored groups. area: Rectangle area model. mental: Mental math examples using distributive property. quiz: Practice questions"
+        },
+        "a": {
+            "label": "Multiplier (rows)",
+            "range": "1-8",
+            "min": 1,
+            "max": 8,
+            "url_key": "a",
+            "effect": "Number of rows in array or height of rectangle. This is the number being distributed across the sum (b + c)"
+        },
+        "b": {
+            "label": "First Addend (blue columns)",
+            "range": "1-10",
+            "min": 1,
+            "max": 10,
+            "url_key": "b",
+            "effect": "Number of blue columns/width. First number in the sum being multiplied. Forms the first product: a × b"
+        },
+        "c": {
+            "label": "Second Addend (green columns)",
+            "range": "1-10",
+            "min": 1,
+            "max": 10,
+            "url_key": "c",
+            "effect": "Number of green columns/width. Second number in the sum being multiplied. Forms the second product: a × c"
+        },
+        "mentalMathIndex": {
+            "label": "Mental Math Example",
+            "range": "0-4",
+            "min": 0,
+            "max": 4,
+            "url_key": "mentalMathIndex",
+            "effect": "Selects which mental math example to display (5 examples: 97×25, 95×8, 104×15, 49×50, 998×7). Each shows how to use distributive property for quick calculations"
+        },
+        "quizIndex": {
+            "label": "Quiz Question",
+            "range": "0-9",
+            "min": 0,
+            "max": 9,
+            "url_key": "quizIndex",
+            "effect": "Selects which quiz question to display (10 questions total with progressive difficulty)"
+        }
+    },
     "parameters": [
         {
             "name": "mode",

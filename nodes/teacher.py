@@ -236,6 +236,7 @@ def teacher_node(state: Dict[str, Any], config: RunnableConfig) -> Dict[str, Any
     student_requested_param = state.get("student_requested_param", False)
     requested_param = state.get("requested_param", "")
     requested_value = state.get("requested_value", None)
+    student_wants_to_see_simulation = state.get("student_wants_to_see_simulation", False)
     
     print(f"   Concept: {current_concept['title']}")
     print(f"   Strategy: {strategy}")
@@ -245,7 +246,10 @@ def teacher_node(state: Dict[str, Any], config: RunnableConfig) -> Dict[str, Any
     if student_asked_question:
         print(f"   ❓ Student asked: {question_asked}")
     if student_requested_param:
-        print(f"   🎛️ Student requested: {requested_param} = {requested_value}")
+        if student_wants_to_see_simulation:
+            print(f"   🖥️ Student wants to SEE the simulation")
+        else:
+            print(f"   🎛️ Student requested: {requested_param} = {requested_value}")
     if is_factually_wrong:
         print(f"   ❌ Student gave WRONG answer - needs correction")
     if needs_clarification:
@@ -377,7 +381,8 @@ PREDICT: What do you think will happen?"
 ```
 """
         else:
-            # Very first concept - just introduce it
+            # Very first concept - just introduce it AND SHOW the simulation
+            suggested_param = current_concept.get('related_params', [None])[0]
             user_prompt = f"""
 CONCEPT TO TEACH:
 Title: {current_concept['title']}
@@ -389,17 +394,22 @@ This is the START of the lesson. The student hasn't said anything yet.
 
 Generate an engaging introduction that:
 1. Introduces what we'll explore
-2. Connects to something relatable if possible
-3. Ends with a thought-provoking question OR asks for a prediction with options
+2. Mentions the current visualization (with parameters: {current_params_str})
+3. Connects to something relatable if possible
+4. Ends with a thought-provoking question OR asks for a prediction with options
+
+⚠️ IMPORTANT: Set suggests_param_change to TRUE so the simulation is VISIBLE from the start!
+You can use the current parameters or make a small adjustment to make it show.
 
 ⚠️ RESPOND WITH ONLY THIS JSON FORMAT (no other text):
 ```json
 {{
-    "teacher_message": "Your warm, engaging introduction...",
-    "suggests_param_change": false,
-    "param_to_change": null,
-    "new_value": null,
-    "prediction_question": null
+    "teacher_message": "Your warm intro that mentions the visual/simulation...",
+    "suggests_param_change": true,
+    "param_to_change": "{suggested_param}",
+    "new_value": {current_params.get(suggested_param, 0) if suggested_param else 0},
+    "change_reason": "Display initial simulation state",
+    "prediction_question": "What do you notice/expect?"
 }}
 ```
 """
@@ -430,7 +440,39 @@ YOUR RESPONSE FORMAT:
         # Build instruction for student's PARAMETER REQUEST
         param_request_instruction = ""
         if student_requested_param and requested_param:
-            param_request_instruction = f"""
+            if student_wants_to_see_simulation:
+                # Student asked to see/show/display the simulation
+                param_request_instruction =f"""
+🖥️🖥️🖥️ MANDATORY: STUDENT WANTS TO SEE THE SIMULATION 🖥️🖥️🖥️
+The student asked to see, show, or display the simulation.
+
+⚠️ CRITICAL: YOU MUST make this visible to them!
+
+YOU MUST:
+1. ACKNOWLEDGE positively: "Of course!" or "Sure, let me show you!" or "Absolutely!"
+2. DESCRIBE the current simulation state using the CURRENT parameters:
+   {current_params_str}
+3. GUIDE their attention: "Look at..." or "Notice how..." or "Can you see..."
+4. ASK an observation question about what they see
+
+IMPORTANT:
+- Set "suggests_param_change": true (this triggers the visual display)
+- You can choose ANY parameter to "refresh" or use a related param from the concept
+- This makes the simulation visible on their screen!
+
+Example Response:
+{{
+    "teacher_message": "Of course, friend! Right now you're looking at [describe current state with {current_params_str}]. Can you see [ask about a visual element]?",
+    "suggests_param_change": true,
+    "param_to_change": "{list(PARAMETER_INFO.keys())[0] if PARAMETER_INFO else 'parameter'}",
+    "new_value": {current_params.get(list(PARAMETER_INFO.keys())[0] if PARAMETER_INFO else '', 0)},
+    "change_reason": "Display current simulation state",
+    "prediction_question": "What do you observe?"
+}}
+"""
+            else:
+                # Normal parameter change request
+                param_request_instruction = f"""
 🎛️🎛️🎛️ MANDATORY: STUDENT REQUESTED PARAMETER CHANGE 🎛️🎛️🎛️
 The student wants to change: {requested_param}
 

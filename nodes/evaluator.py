@@ -191,9 +191,12 @@ First, determine what TYPE of response this is:
 2. "question" - Student is ASKING a question or requesting explanation
    Examples: "What's the formula?", "Can you explain again?", "Why does that happen?", "What is time period?"
 
-3. "param_request" - Student wants to CHANGE simulation parameters
-   Examples: "Change length to 3", "Set it to 5 units", "Make it shorter", "Try with 20 oscillations"
+3. "param_request" - Student wants to CHANGE simulation parameters OR see the simulation
+   Examples: 
+   - "Change length to 3", "Set it to 5 units", "Make it shorter", "Try with 20 oscillations"
+   - "Can you show the simulation?", "Show me", "Let me see it", "Display the simulation", "Show simulation as well"
    NOTE: Student may request MULTIPLE params at once
+   ⚠️ IMPORTANT: If student asks to "show", "see", or "display" the simulation, treat as param_request with "show_simulation": true
 
 ═══════════════════════════════════════════════════════════════
 STEP 2: BASED ON TYPE, FILL RELEVANT FIELDS
@@ -212,6 +215,7 @@ IF response_type == "param_request":
 - Extract the requested value
 - Validate it's in range
 - Set level to current understanding (don't change it)
+- **SPECIAL CASE**: If student asks to "show"/"see"/"display" simulation (without specifying values), set "show_simulation": true
 
 ═══════════════════════════════════════════════════════════════
 UNDERSTANDING LEVELS (only for "answer" type):
@@ -249,7 +253,8 @@ RESPOND WITH ONLY THIS JSON:
     "param_value": number or null,
     "param_valid": true/false,
     "length_value": number or null (if length was requested),
-    "oscillations_value": number or null (if oscillations was requested)
+    "oscillations_value": number or null (if oscillations was requested),
+    "show_simulation": true/false (true if student asked to see/show/display simulation without specific values)
 }}
 ```
 """
@@ -343,43 +348,53 @@ RESPOND WITH ONLY THIS JSON:
         
     elif response_type == "param_request":
         # Student requested parameter change
-        param = result.get("param_requested")
+        param =result.get("param_requested")
         value = result.get("param_value")
         is_valid = result.get("param_valid", False)
+        show_simulation = result.get("show_simulation", False)
         
         # Handle "both" - multiple params requested
         length_val = result.get("length_value")
         osc_val = result.get("oscillations_value")
         
-        if param == "both":
+        if show_simulation:
+            print(f"   🖥️ Student requested to SEE/SHOW simulation")
+            output["student_wants_to_see_simulation"] = True
+            output["student_requested_param"] = True  # Treat this as a param request
+            output["requested_param"] = "show"  # Special marker
+            output["requested_value"] = None
+            output["param_request_valid"] = True
+        elif param == "both":
             print(f"   🎛️ Multiple Parameters Requested:")
             print(f"      - length = {length_val}")
             print(f"      - oscillations = {osc_val}")
         else:
             print(f"   🎛️ Parameter Request: {param} = {value}")
-        print(f"   ✓ Valid: {is_valid}")
+            print(f"   ✓ Valid: {is_valid}")
         
-        output["student_requested_param"] = True
-        output["requested_param"] = param
-        output["requested_value"] = value
-        output["param_request_valid"] = is_valid
+        if not show_simulation:
+            output["student_requested_param"] = True
+            output["requested_param"] = param
+            output["requested_value"] = value
+            output["param_request_valid"] = is_valid
         
-        # If valid, update the params
-        new_params = current_params.copy()
-        if param == "both":
-            # Handle both parameters
-            if length_val is not None:
-                new_params["length"] = length_val
-                print(f"   ✅ Updating length → {length_val}")
-            if osc_val is not None:
-                new_params["number_of_oscillations"] = osc_val
-                print(f"   ✅ Updating oscillations → {osc_val}")
-            if length_val is not None or osc_val is not None:
+        # If valid, update the params (only for actual value changes, not show requests)
+        if not show_simulation:
+            new_params = current_params.copy()
+            if param == "both":
+                # Handle both parameters
+                if length_val is not None:
+                    new_params["length"] = length_val
+                    print(f"   ✅ Updating length → {length_val}")
+                if osc_val is not None:
+                    new_params["number_of_oscillations"] = osc_val
+                    print(f"   ✅ Updating oscillations → {osc_val}")
+                if length_val is not None or osc_val is not None:
+                    output["current_params"] = new_params
+            elif is_valid and param and value is not None:
+                new_params[param] = value
                 output["current_params"] = new_params
-        elif is_valid and param and value is not None:
-            new_params[param] = value
-            output["current_params"] = new_params
-            print(f"   ✅ Updating params: {param} → {value}")
+                print(f"   ✅ Updating params: {param} → {value}")
         
         # Don't update trajectory for param requests
         output["understanding_trajectory"] = state.get("understanding_trajectory", [])
